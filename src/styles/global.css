@@ -1008,8 +1008,13 @@ a {
     bottom: 208px;
   }
 
+  /* long labels wrap to two lines instead of spanning the screen */
   .module-label .pill {
+    max-width: 250px;
     padding: 10px 14px;
+    border-radius: 18px;
+    line-height: 1.3;
+    white-space: normal;
   }
 
   .hint,

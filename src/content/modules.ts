@@ -55,7 +55,7 @@ export const MODULES: Record<ModuleKey, ModuleInfo> = {
   },
   thinking: {
     n: '03',
-    label: 'Mind Map',
+    label: 'Problem Definition and Analysis',
     verb: 'Synthesize',
     title: 'Problem Definition & Root Causes',
     building: 'welch',

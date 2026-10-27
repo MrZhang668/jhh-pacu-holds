@@ -111,31 +111,50 @@ export const CONVERSATIONS: Conversation[] = [
   },
 ]
 
-/** Steps of the hand-off chain, with what staff told us goes wrong at each. */
+/**
+ * Steps of the hand-off chain, with what staff told us goes wrong at each.
+ * `lane` places a step on the patient path or in the support lane below it;
+ * `heard` lists which conversation groups count towards that step.
+ */
 export const STAKEHOLDERS = [
   {
     key: 'OR',
+    lane: 'flow',
     name: 'Operating rooms',
+    short: 'OR',
+    heard: ['OR'],
     pain: 'Cases are scheduled around surgeon availability: ICU-bound cases early, high-volume outpatient cases later. With no PACU bay ready, patients wait in the OR and the next case can’t start.',
   },
   {
     key: 'PACU',
-    name: 'PACU',
+    lane: 'flow',
+    name: 'Post-anesthesia care units',
+    short: 'PACU',
+    heard: ['PACU'],
     pain: 'Recovery bays double as overflow for ICU and IMC downgrades. Acuity and length of stay vary, so the 90-minute target is often missed even after patients meet discharge criteria.',
   },
   {
     key: 'Inpatient',
+    lane: 'flow',
     name: 'Inpatient units',
+    short: 'Inpatient',
+    heard: ['Inpatient'],
     pain: 'Arrivals during the 7 PM hand-off collide with report; late posting leaves no time to prepare; a free bed isn’t a free nurse — sometimes a dirty bed under a less-busy nurse.',
   },
   {
     key: 'Command Center',
-    name: 'Command Center (bed management)',
-    pain: 'A patient not documented in the PACU doesn’t appear in Epic and can’t be posted. Practices differ from one bed manager to the next.',
+    lane: 'support',
+    name: 'Command Center & nursing leadership',
+    short: 'Bed management · leadership',
+    heard: ['Command Center', 'Leadership'],
+    pain: 'A patient not documented in the PACU doesn’t appear in Epic and can’t be posted. Practices differ from one bed manager to the next, and nursing coverage is balanced hospital-wide rather than unit by unit.',
   },
   {
     key: 'EVS',
+    lane: 'support',
     name: 'Environmental Services',
+    short: 'Room cleaning',
+    heard: [],
     pain: 'Rooms take about 45 minutes to clean, sometimes hours, and there is no standard way to tell bed managers a room is ready.',
   },
 ] as const
@@ -187,11 +206,6 @@ export const JOURNEY = [
   { step: 'Ready to move', time: 'hold starts', text: 'Posted for a bed — waiting for a clean, assigned room and a receiving nurse.', hold: true },
   { step: 'Hand-off', time: 'face to face', text: 'Report must happen in person; few patients move during the 7:00–7:30 shift change.' },
 ]
-
-export const QUOTE = {
-  text: 'Patients who get in here faster, do better.',
-  who: 'Bed Management Program Director',
-}
 
 /** The semi-structured interview guide we used, by topic. */
 export const GUIDE = [

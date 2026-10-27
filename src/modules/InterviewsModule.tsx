@@ -3,7 +3,6 @@ import {
   CONVERSATIONS,
   GUIDE,
   JOURNEY,
-  QUOTE,
   STAKEHOLDERS,
   THEME_CARDS,
   THEMES,
@@ -17,54 +16,105 @@ export default function InterviewsModule() {
       <Timeline />
       <ThemeCards />
       <Journey />
-      <blockquote className="quote">
-        <p>“{QUOTE.text}”</p>
-        <footer>— {QUOTE.who}</footer>
-      </blockquote>
       <Guide />
       <p className="sources">Interviewees appear by role and unit only.</p>
     </>
   )
 }
 
-/** The hand-off chain; pick a step to see what people there told us. */
+type StepKey = (typeof STAKEHOLDERS)[number]['key']
+
+const heardAt = (s: (typeof STAKEHOLDERS)[number]) =>
+  CONVERSATIONS.filter((c) => (s.heard as readonly string[]).includes(c.where))
+
+/** The hand-off chain as two lanes; a step's notes open only when it is picked. */
 function StakeholderMap() {
-  const [active, setActive] = useState<(typeof STAKEHOLDERS)[number]['key']>('PACU')
-  const node = STAKEHOLDERS.find((s) => s.key === active)!
-  const heard = CONVERSATIONS.filter((c) => c.where === active)
-  const button = (key: (typeof STAKEHOLDERS)[number]['key']) => {
-    const s = STAKEHOLDERS.find((x) => x.key === key)!
+  const [active, setActive] = useState<StepKey | null>(null)
+  const node = STAKEHOLDERS.find((s) => s.key === active)
+  const flow = STAKEHOLDERS.filter((s) => s.lane === 'flow')
+  const support = STAKEHOLDERS.filter((s) => s.lane === 'support')
+
+  const card = (s: (typeof STAKEHOLDERS)[number], i?: number) => {
+    const n = heardAt(s).length
     return (
-      <button type="button" className="sh-node" aria-pressed={active === key} onClick={() => setActive(key)}>
-        {s.name}
+      <button
+        key={s.key}
+        type="button"
+        className="sh-node"
+        aria-expanded={active === s.key}
+        aria-controls="sh-detail"
+        onClick={() => setActive(active === s.key ? null : s.key)}
+      >
+        {i !== undefined && <span className="sh-step">0{i + 1}</span>}
+        <span className="sh-name">{s.short}</span>
+        <span className="sh-count">{n ? `${n} conversation${n > 1 ? 's' : ''}` : 'Described by others'}</span>
       </button>
     )
   }
+
   return (
     <section>
       <h3>Who we heard from</h3>
+      <img
+        className="sh-hero"
+        src={`${import.meta.env.BASE_URL}images/who-we-heard.webp`}
+        width={1672}
+        height={941}
+        alt="Illustration: staff from the OR, PACU, inpatient units, bed management and nursing supervision around one table, discussing the OR → PACU → inpatient hand-off."
+        loading="lazy"
+      />
       <div className="sh-map">
-        <div className="sh-chain">
-          {button('OR')}
-          <span className="sh-arrow" aria-hidden="true">→</span>
-          {button('PACU')}
-          <span className="sh-arrow" aria-hidden="true">→</span>
-          {button('Inpatient')}
+        <p className="sh-lane-label">Patient path</p>
+        <div className="sh-flow">
+          {flow.map((s, i) => (
+            <div key={s.key} className="sh-cell">
+              {card(s, i)}
+              {i < flow.length - 1 && (
+                <span className="sh-arrow" aria-hidden="true">
+                  →
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="sh-ticks" aria-hidden="true">
+          {flow.map((s) => (
+            <span key={s.key} />
+          ))}
         </div>
         <div className="sh-support">
-          {button('Command Center')}
-          {button('EVS')}
+          <p className="sh-lane-label">Supporting every step</p>
+          <div className="sh-support-row">{support.map((s) => card(s))}</div>
         </div>
       </div>
-      <div className="sh-detail" aria-live="polite">
-        <h4>{node.name}</h4>
-        <p>{node.pain}</p>
-        <p className="sh-heard">
-          {heard.length
-            ? `We spoke with: ${heard.map((c) => c.role).join('; ')}.`
-            : 'No direct interview here; bed managers and PACU managers described this step.'}
+      {node ? (
+        <div id="sh-detail" className="sh-detail" key={node.key} aria-live="polite">
+          <button type="button" className="sh-close" aria-label="Close" onClick={() => setActive(null)}>
+            ×
+          </button>
+          <h4>{node.name}</h4>
+          <p>{node.pain}</p>
+          <p className="sh-heard-label">We spoke with</p>
+          {heardAt(node).length ? (
+            <ul className="sh-heard">
+              {heardAt(node).map((c) => (
+                <li key={c.date + c.role}>
+                  <span>{c.role}</span>
+                  <span className="format">
+                    {c.format} · {c.date}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="sh-none">No direct interview here; bed managers and PACU managers described this step.</p>
+          )}
+        </div>
+      ) : (
+        <p id="sh-detail" className="sh-hint">
+          Select a step to see what we heard there.
         </p>
-      </div>
+      )}
     </section>
   )
 }

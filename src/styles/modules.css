@@ -957,6 +957,7 @@ button.mm-node:hover {
 }
 
 .matrix {
+  container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(200px, 1fr);
   gap: 16px;
@@ -972,26 +973,9 @@ button.mm-node:hover {
   height: auto;
 }
 
-.matrix .quick-wins {
-  fill: rgba(255, 207, 1, 0.12);
-}
-
-.matrix .mid {
-  stroke: var(--viz-grid);
-  stroke-width: 1;
-}
-
 .matrix .axis {
   stroke: var(--viz-axis);
   stroke-width: 1;
-}
-
-.matrix .quad {
-  fill: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .matrix .axis-label {
@@ -1033,27 +1017,288 @@ button.mm-node:hover {
   fill: var(--spirit-blue);
 }
 
-.matrix-list {
+/* impact matrix: points coloured by where the issue happens (the issue tree's branch colours) */
+.mx-legend,
+.matrix.mx {
+  --b0: #004b8d;
+  --b1: #e8b400;
+  --b2: #3b8a87;
+  --b3: #68ace5;
+}
+
+:root[data-theme='night'] .mx-legend,
+:root[data-theme='night'] .matrix.mx {
+  --b0: #9cc9f0;
+  --b1: #ffcf01;
+  --b2: #6cc4b8;
+  --b3: #8b9dc7;
+}
+
+.mx-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.mx-chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mx-chip[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--panel);
+}
+
+.mx-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.mx-count {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.c0 { --c: var(--b0); }
+.c1 { --c: var(--b1); }
+.c2 { --c: var(--b2); }
+.c3 { --c: var(--b3); }
+
+.matrix.mx {
+  grid-template-columns: 1fr;
+}
+
+/* on phones the chart keeps a readable size and scrolls sideways; the lists below carry the detail */
+.mx-plot {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.mx-plot svg {
+  display: block;
+  min-width: 460px;
+}
+
+.mx-quad rect {
+  fill: transparent;
+  transition: fill 250ms var(--ease);
+}
+
+.mx-mid {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 5;
+  opacity: 0.45;
+}
+
+.mx-quad.q0 rect {
+  fill: rgba(255, 207, 1, 0.13);
+}
+
+.mx-quad.is-on rect {
+  fill: rgba(255, 207, 1, 0.24);
+}
+
+.mx-quad text {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mx-quad.q0 text {
+  fill: #9a7400;
+}
+
+:root[data-theme='night'] .mx-quad.q0 text {
+  fill: var(--gold);
+}
+
+.mx .pt .dot {
+  fill: var(--c);
+}
+
+.mx .pt.c1 text,
+.mx .pt.c3 text {
+  fill: #13203a;
+}
+
+:root[data-theme='night'] .mx .pt text {
+  fill: #13203a;
+}
+
+.mx .pt.is-hover .dot,
+.mx .pt:focus-visible .dot {
+  fill: var(--c);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.pt.is-dim {
+  opacity: 0.15;
+}
+
+.mx-trail {
+  transition: opacity 300ms var(--ease);
+}
+
+.mx-trail line {
+  stroke: var(--c);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+  opacity: 0.7;
+}
+
+.mx-trail circle {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.mx-trail.is-off {
+  opacity: 0.1;
+}
+
+.mx-tag text {
+  fill: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--viz-surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* the quadrants again as lists, in the chart's layout */
+.mx-quads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mx-box {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  transition: border-color 250ms var(--ease);
+}
+
+.mx-box.q0 {
+  border-color: rgba(232, 180, 0, 0.6);
+  background: rgba(255, 207, 1, 0.08);
+}
+
+.mx-box.is-on {
+  border-color: var(--gold);
+}
+
+.mx-box-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.mx-box-head b {
+  color: var(--title);
+  font: 700 15px var(--font-serif);
+}
+
+.mx-box-head span {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.mx-box ul {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 12.5px;
 }
 
-.matrix-list li {
+.mx-box li {
   display: flex;
   gap: 8px;
-  align-items: baseline;
+  align-items: flex-start;
   padding: 3px 4px;
   border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: opacity 250ms var(--ease);
 }
 
-.matrix-list li.is-off {
-  opacity: 0.4;
+.mx-box li.is-hover {
+  background: rgba(255, 207, 1, 0.2);
 }
 
-.matrix-list li.is-hover {
-  background: rgba(255, 207, 1, 0.18);
+.mx-box li.is-dim {
+  opacity: 0.3;
+}
+
+.mx-num {
+  display: inline-grid;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--c);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.c1 .mx-num,
+.c3 .mx-num,
+:root[data-theme='night'] .mx-num {
+  color: #13203a;
+}
+
+.mx-moved {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.mx-moved::before {
+  content: '↗ ';
+}
+
+.mx-empty {
+  margin: 0 !important;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.mx-dropped {
+  margin: 0 !important;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@container (max-width: 460px) {
+  .mx-quads {
+    grid-template-columns: 1fr;
+  }
 }
 
 .num {

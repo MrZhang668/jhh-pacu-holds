@@ -268,18 +268,50 @@ function IssueTree({ highlight }: { highlight: string | null }) {
   )
 }
 
-/** Appendix C: impact × effort, round 1 vs the revised round 2. Click a point to find it in the tree. */
+// where an issue happens, from its node in the issue tree; colours match the tree's branches
+const LOCATIONS = ['Operating room', 'PACU', 'Inpatient unit', 'Hospital-wide']
+const locOf = (node: string) => (node.startsWith('or-') ? 0 : node.startsWith('pacu-') ? 1 : node.startsWith('in-') ? 2 : 3)
+
+// quadrants in reading order, matching the chart: top-left, top-right, bottom-left, bottom-right
+const QUADS = [
+  { name: 'Quick wins', note: 'High impact · low effort' },
+  { name: 'Major projects', note: 'High impact · high effort' },
+  { name: 'Fill-ins', note: 'Low impact · low effort' },
+  { name: 'Hard, low payoff', note: 'Low impact · high effort' },
+]
+const quadOf = ([x, y]: [number, number]) => (y >= 0.5 ? 0 : 2) + (x >= 0.5 ? 1 : 0)
+
+/** Appendix C: impact × effort, round 1 vs the revised round 2, sorted into quadrants and coloured by location. */
 function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
   const [round, setRound] = useState<'r1' | 'r2'>('r2')
   const [hover, setHover] = useState<string | null>(null)
+  const [loc, setLoc] = useState<number | null>(null)
+  const [quad, setQuad] = useState<number | null>(null)
   const W = 560
-  const H = 400
+  const H = 430
   const X0 = 56
   const X1 = 540
-  const Y0 = 16
-  const Y1 = 352
+  const Y0 = 34
+  const Y1 = 370
+  const XM = (X0 + X1) / 2
+  const YM = (Y0 + Y1) / 2
   const px = (x: number) => X0 + x * (X1 - X0)
   const py = (y: number) => Y1 - y * (Y1 - Y0)
+  // numbered in reading order: quadrant by quadrant, so each list counts up
+  const ranked = MATRIX.filter((m) => m[round]).sort((a, b) => quadOf(a[round]!) - quadOf(b[round]!))
+  const items = MATRIX.map((m) => ({ ...m, n: ranked.indexOf(m) + 1, loc: locOf(m.node), pos: m[round] }))
+  const shown = items.filter((m) => m.pos)
+  const dropped = items.filter((m) => !m.pos)
+  const lit = (m: (typeof items)[number]) => (loc === null || m.loc === loc) && (quad === null || (m.pos && quadOf(m.pos) === quad))
+  // where an item sat in the other round, if it changed quadrant (round 2 only)
+  const movedFrom = (m: (typeof items)[number]) =>
+    round === 'r2' && m.r1 && m.r2 && quadOf(m.r1) !== quadOf(m.r2) ? QUADS[quadOf(m.r1)].name : null
+  const quadRect = [
+    [X0, Y0],
+    [XM, Y0],
+    [X0, YM],
+    [XM, YM],
+  ]
   return (
     <section>
       <div className="matrix-head">
@@ -293,66 +325,152 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
           </button>
         </div>
       </div>
-      <div className="matrix">
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Impact versus effort, ${round === 'r1' ? 'first' : 'revised'} round`}>
-          <rect x={X0} y={Y0} width={(X1 - X0) / 2} height={(Y1 - Y0) / 2} className="quick-wins" />
-          <line x1={X0} x2={X1} y1={(Y0 + Y1) / 2} y2={(Y0 + Y1) / 2} className="mid" />
-          <line x1={(X0 + X1) / 2} x2={(X0 + X1) / 2} y1={Y0} y2={Y1} className="mid" />
-          <line x1={X0} x2={X1} y1={Y1} y2={Y1} className="axis" />
-          <line x1={X0} x2={X0} y1={Y0} y2={Y1} className="axis" />
-          <text x={X0 + 8} y={Y0 + 16} className="quad">Quick wins</text>
-          <text x={X1 - 8} y={Y0 + 16} className="quad" textAnchor="end">Major projects</text>
-          <text x={X0 + 8} y={Y1 - 8} className="quad">Fill-ins</text>
-          <text x={X1 - 8} y={Y1 - 8} className="quad" textAnchor="end">Hard, low payoff</text>
-          <text x={(X0 + X1) / 2} y={H - 14} className="axis-label" textAnchor="middle">Effort →</text>
-          <text x={18} y={(Y0 + Y1) / 2} className="axis-label" textAnchor="middle" transform={`rotate(-90 18 ${(Y0 + Y1) / 2})`}>
-            Impact →
-          </text>
-          {MATRIX.map((m, i) => {
-            const pos = m[round]
-            const shown = Boolean(pos)
-            const [x, y] = pos ?? m.r1 ?? m.r2 ?? [0.5, 0.5]
+      <div className="mx-legend" role="group" aria-label="Filter by where the issue happens">
+        {LOCATIONS.map((l, i) => (
+          <button key={l} type="button" className={`mx-chip c${i}`} aria-pressed={loc === i} onClick={() => setLoc(loc === i ? null : i)}>
+            <span className="mx-swatch" aria-hidden="true" />
+            {l}
+            <span className="mx-count">{shown.filter((m) => m.loc === i).length}</span>
+          </button>
+        ))}
+      </div>
+      <div className="matrix mx">
+        <div className="mx-plot">
+          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Impact versus effort, ${round === 'r1' ? 'first' : 'revised'} round`}>
+            {QUADS.map((q, i) => {
+              const [x, y] = quadRect[i]
+              const n = shown.filter((m) => quadOf(m.pos!) === i).length
+              return (
+                <g key={q.name} className={`mx-quad q${i}${quad === i ? ' is-on' : ''}${quad !== null && quad !== i ? ' is-off' : ''}`}>
+                  <rect x={x} y={y} width={XM - X0} height={YM - Y0} />
+                  {/* labels sit outside the plot so they never cover a point */}
+                  <text x={i % 2 ? x + (XM - X0) : x + 4} y={i < 2 ? Y0 - 10 : Y1 + 22} textAnchor={i % 2 ? 'end' : 'start'}>
+                    {q.name} · {n}
+                  </text>
+                </g>
+              )
+            })}
+            <line x1={XM} x2={XM} y1={Y0} y2={Y1} className="mx-mid" />
+            <line x1={X0} x2={X1} y1={YM} y2={YM} className="mx-mid" />
+            <line x1={X0} x2={X1} y1={Y1} y2={Y1} className="axis" />
+            <line x1={X0} x2={X0} y1={Y0} y2={Y1} className="axis" />
+            <text x={XM} y={H - 8} className="axis-label" textAnchor="middle">
+              Effort →
+            </text>
+            <text x={18} y={YM} className="axis-label" textAnchor="middle" transform={`rotate(-90 18 ${YM})`}>
+              Impact →
+            </text>
+            {/* round 2: a faint trail from where each issue sat in round 1 */}
+            {round === 'r2' &&
+              items.map((m) =>
+                m.r1 && m.r2 && Math.hypot(m.r1[0] - m.r2[0], m.r1[1] - m.r2[1]) > 0.04 ? (
+                  <g key={`t-${m.key}`} className={`mx-trail c${m.loc}${lit(m) ? '' : ' is-off'}`}>
+                    <line x1={px(m.r1[0])} y1={py(m.r1[1])} x2={px(m.r2[0])} y2={py(m.r2[1])} />
+                    <circle cx={px(m.r1[0])} cy={py(m.r1[1])} r={4} />
+                  </g>
+                ) : null,
+              )}
+            {items.map((m) => {
+              const pos = m.pos
+              const [x, y] = pos ?? m.r1 ?? m.r2 ?? [0.5, 0.5]
+              const on = Boolean(pos)
+              return (
+                <g
+                  key={m.key}
+                  className={`pt c${m.loc}${hover === m.key ? ' is-hover' : ''}${on && !lit(m) ? ' is-dim' : ''}`}
+                  style={{ transform: `translate(${px(x)}px, ${py(y)}px)`, opacity: on ? undefined : 0, pointerEvents: on ? 'auto' : 'none' }}
+                  tabIndex={on ? 0 : -1}
+                  role="button"
+                  aria-label={`${m.n}. ${m.label}, ${LOCATIONS[m.loc]} — show in the issue tree`}
+                  onMouseEnter={() => setHover(m.key)}
+                  onMouseLeave={() => setHover(null)}
+                  onFocus={() => setHover(m.key)}
+                  onBlur={() => setHover(null)}
+                  onClick={() => onPick(m.node)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') onPick(m.node)
+                  }}
+                >
+                  <circle r={14} className="hit" />
+                  <circle r={11} className="dot" />
+                  <text dy={4} textAnchor="middle">
+                    {m.n}
+                  </text>
+                </g>
+              )
+            })}
+            {hover &&
+              (() => {
+                const m = items.find((i) => i.key === hover)
+                if (!m?.pos) return null
+                const x = px(m.pos[0])
+                const y = py(m.pos[1])
+                const left = m.pos[0] > 0.6
+                return (
+                  <g className="mx-tag" transform={`translate(${x + (left ? -18 : 18)} ${y})`}>
+                    <text textAnchor={left ? 'end' : 'start'} dy={4}>
+                      {m.label}
+                    </text>
+                  </g>
+                )
+              })()}
+          </svg>
+        </div>
+        {/* the same four quadrants as lists, laid out like the chart */}
+        <div className="mx-quads">
+          {QUADS.map((q, i) => {
+            const list = shown.filter((m) => quadOf(m.pos!) === i)
             return (
-              <g
-                key={m.key}
-                className={`pt${hover === m.key ? ' is-hover' : ''}`}
-                style={{ transform: `translate(${px(x)}px, ${py(y)}px)`, opacity: shown ? 1 : 0, pointerEvents: shown ? 'auto' : 'none' }}
-                tabIndex={shown ? 0 : -1}
-                role="button"
-                aria-label={`${i + 1}. ${m.label} — show in the issue tree`}
-                onMouseEnter={() => setHover(m.key)}
-                onMouseLeave={() => setHover(null)}
-                onFocus={() => setHover(m.key)}
-                onBlur={() => setHover(null)}
-                onClick={() => onPick(m.node)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') onPick(m.node)
-                }}
+              <div
+                key={q.name}
+                className={`mx-box q${i}${quad === i ? ' is-on' : ''}`}
+                onMouseEnter={() => setQuad(i)}
+                onMouseLeave={() => setQuad(null)}
               >
-                <circle r={14} className="hit" />
-                <circle r={10} className="dot" />
-                <text dy={4} textAnchor="middle">
-                  {i + 1}
-                </text>
-              </g>
+                <div className="mx-box-head">
+                  <b>{q.name}</b>
+                  <span>{q.note}</span>
+                </div>
+                {list.length ? (
+                  <ul>
+                    {list.map((m) => {
+                      const from = movedFrom(m)
+                      const added = round === 'r2' && !m.r1
+                      return (
+                        <li
+                          key={m.key}
+                          className={`c${m.loc}${hover === m.key ? ' is-hover' : ''}${lit(m) ? '' : ' is-dim'}`}
+                          onMouseEnter={() => setHover(m.key)}
+                          onMouseLeave={() => setHover(null)}
+                          onClick={() => onPick(m.node)}
+                        >
+                          <span className="mx-num">{m.n}</span>
+                          <span>
+                            {m.label}
+                            {from && <em className="mx-moved">from {from}</em>}
+                            {added && <em className="mx-moved">new in round 2</em>}
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                ) : (
+                  <p className="mx-empty">None</p>
+                )}
+              </div>
             )
           })}
-        </svg>
-        <ol className="matrix-list">
-          {MATRIX.map((m, i) => (
-            <li
-              key={m.key}
-              className={`${m[round] ? '' : 'is-off'}${hover === m.key ? ' is-hover' : ''}`}
-              onMouseEnter={() => setHover(m.key)}
-              onMouseLeave={() => setHover(null)}
-            >
-              <span className="num">{i + 1}</span>
-              {m.label}
-            </li>
-          ))}
-        </ol>
+        </div>
+        {dropped.length > 0 && (
+          <p className="mx-dropped">
+            {round === 'r2' ? 'Dropped in round 2' : 'Added in round 2'}: {dropped.map((m) => m.label).join(', ')}
+          </p>
+        )}
       </div>
-      <p className="sources">Positions read off the team’s two hand-drawn rounds; click a point to find it in the issue tree.</p>
+      <p className="sources">
+        Positions read off the team’s two hand-drawn rounds. Colours show where each issue happens; click a point or an item to find
+        it in the issue tree.
+      </p>
     </section>
   )
 }

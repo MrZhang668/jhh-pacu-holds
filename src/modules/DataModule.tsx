@@ -61,9 +61,9 @@ function HourHeatmap() {
       table={{
         caption: 'Share of each reason’s holds by start hour (%)',
         columns: ['Start hour', ...HOURLY_REASONS.map((r) => r.label)],
-        rows: hours.map((h) => [hourRange(h), ...HOURLY_REASONS.map((r) => r.shares[h].toFixed(1))]),
+        rows: hours.map((h) => [hourRange(h), ...HOURLY_REASONS.map((r) => String(r.shares[h]))]),
       }}
-      note="Each row sums to 100%: it shows when that reason’s holds begin."
+      note="Each row sums to about 100% (whole percents, rounded): it shows when that reason’s holds begin."
     >
       <div className="heatmap" ref={host}>
         <div className="hm-grid">
@@ -81,7 +81,7 @@ function HourHeatmap() {
                   key={h}
                   className={`hm-cell${h === 19 ? ' is-shift' : ''}`}
                   style={{ background: rampColor(stops, s / HEAT_MAX) }}
-                  {...bind({ value: pct(s), label: `${r.label}, ${hourRange(h)}`, sub: 'of this reason’s holds' })}
+                  {...bind({ value: pct(s, 0), label: `${r.label}, ${hourRange(h)}`, sub: 'of this reason’s holds' })}
                 />
               ))}
             </Fragment>

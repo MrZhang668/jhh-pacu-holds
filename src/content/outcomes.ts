@@ -1,27 +1,11 @@
-// Module 04: root causes, the three interventions, worldwide examples, impact. From the final report.
-
-export const ROOT_CAUSES = [
-  {
-    key: 'handoff',
-    text: 'Conflicting duties at shift change, as patients posted to arrive between 6:45 and 7:15 PM land in the middle of report',
-    fixes: ['overlap'],
-  },
-  {
-    key: 'standard',
-    text: 'No shared standard, so communication and practice follow personal experience and unit culture',
-    fixes: ['tracking', 'cleaning'],
-  },
-  {
-    key: 'visibility',
-    text: 'No cross-department visibility, as status depends on manual entries in Epic and Secure Chat and patients and rooms go “invisible”',
-    fixes: ['tracking', 'cleaning'],
-  },
-]
+// Module 04: the three interventions and worldwide examples. From the final report.
 
 export interface Solution {
   key: 'tracking' | 'overlap' | 'cleaning'
   n: string
   title: string
+  /** one line on the intervention's card */
+  teaser: string
   summary: string
   how: string[]
   roles: { who: string; does: string }[]
@@ -32,6 +16,7 @@ export const SOLUTIONS: Solution[] = [
     key: 'tracking',
     n: '1',
     title: 'NFC patient tracking',
+    teaser: 'A tap at the bedside puts every PACU patient on the bed manager’s board.',
     summary:
       'Each surgical patient gets a reusable NFC card. A tap on the bedside reader logs arrival and departure in Epic automatically, so bed managers see a patient the moment they reach the PACU.',
     how: [
@@ -49,6 +34,7 @@ export const SOLUTIONS: Solution[] = [
     key: 'overlap',
     n: '2',
     title: 'Overlapping shifts',
+    teaser: 'Nurses on 6-to-6 shifts take PACU arrivals while the 7 PM report runs.',
     summary:
       'About a quarter of inpatient nurses move to 6 AM–6 PM / 6 PM–6 AM. They finish their own report by 6:15, so someone is free to receive PACU patients during the 7 o’clock hand-off.',
     how: [
@@ -65,6 +51,7 @@ export const SOLUTIONS: Solution[] = [
     key: 'cleaning',
     n: '3',
     title: 'NFC bed-cleaning status',
+    teaser: 'Two taps tell the Command Center the moment a room is clean.',
     summary:
       'Environmental Services staff tap a card when they start and when they finish cleaning a room. The Command Center sees “cleaning in progress” and “ready to assign” in real time instead of waiting for a call.',
     how: [
@@ -117,21 +104,3 @@ export const EXAMPLES = [
 ]
 
 export const HOME = { place: 'The Johns Hopkins Hospital, Baltimore', lat: 39.3, lon: -76.59 }
-
-export const SUCCESS_FACTORS = [
-  { title: 'Real-time visibility', text: 'Reliable, live status of patients and rooms for everyone who moves them.' },
-  { title: 'Coverage at the hand-off', text: 'Enough free nurses during the busiest transition windows, especially shift change.' },
-  { title: 'Proactive beds', text: 'Rooms prepared before the patient is ready, not after.' },
-]
-
-export const PHASES = [
-  { phase: 'Phase 1', text: 'Configure the Epic workflows and buy a pilot batch of NFC cards.' },
-  { phase: 'Phase 2', text: 'Clinical and EVS champions run short trainings with step-by-step guides and in-system prompts.' },
-  { phase: 'Phase 3', text: 'Extend the cards to every OR, PACU and inpatient unit, with refresher workshops.' },
-]
-
-export const IMPACT =
-  'By focusing on shift coverage, system reliability and proactive planning, we expect visible improvements in patient flow — shorter holds, more surgical throughput, a better patient experience and less strain on staff.'
-
-export const VISION =
-  'A sustainable patient flow that keeps delays down without lowering the standard of care. If the pilots work, the department can extend the approach beyond Weinberg and Zayed.'

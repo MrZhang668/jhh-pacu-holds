@@ -217,7 +217,16 @@ export default function App() {
       )}
       <footer className="smallprint">
         Independent student project (JHU MSEM Team 6) · Not an official Johns Hopkins Medicine website · Map data ©
-        OpenStreetMap contributors
+        OpenStreetMap contributors ·{' '}
+        <a
+          href="#/about"
+          onClick={(e) => {
+            e.preventDefault()
+            navigate('about')
+          }}
+        >
+          About the team &amp; references
+        </a>
       </footer>
       {campus && <SidePanel route={route} onClose={closePanel} />}
       {CAPTURE === 'og' && (

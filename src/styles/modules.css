@@ -1240,47 +1240,6 @@ details.guide ol {
 }
 
 /* ---------- outcomes ---------- */
-.table-wrap {
-  overflow-x: auto;
-}
-
-.cause-grid th,
-.cause-grid td {
-  padding: 12px 10px;
-  border-bottom: 1px solid var(--line);
-  text-align: center;
-  vertical-align: middle;
-}
-
-.cause-grid thead th {
-  color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 600;
-}
-
-.cause-grid tbody th {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-weight: 400;
-  text-align: left;
-}
-
-.cause-grid tbody th span {
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
-.tick-dot {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 3px solid var(--viz-surface);
-  border-radius: 50%;
-  background: var(--viz-1);
-  box-shadow: 0 0 0 1px var(--viz-1);
-}
-
 .solution {
   padding-top: 28px;
   border-top: 1px solid var(--line);
@@ -1299,12 +1258,9 @@ details.guide ol {
 .solution-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 12px;
+  align-items: start;
   margin-top: 18px;
-}
-
-.solution-cols h4 {
-  margin-top: 14px;
 }
 
 .solution-cols ol,
@@ -1534,8 +1490,64 @@ details.guide ol {
   stroke: var(--gold);
 }
 
-.examples {
+.world .example-pin {
+  cursor: pointer;
+}
+
+.world .example-pin .pin {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 160ms var(--ease);
+}
+
+.world .example-pin:hover .pin,
+.world .example-pin.is-open .pin {
+  transform: scale(1.22);
+}
+
+.world .example-pin.is-open .pin {
+  stroke: var(--gold);
+  stroke-width: 4;
+}
+
+.example-slot {
   margin-top: 12px;
+}
+
+.example-card {
+  position: relative;
+  animation: drop-in-card 220ms var(--ease);
+}
+
+@keyframes drop-in-card {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.example-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+}
+
+.example-hint {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13.5px;
 }
 
 .example-value {
@@ -1549,20 +1561,6 @@ details.guide ol {
 .example-measure {
   color: var(--muted);
   font-size: 12.5px !important;
-}
-
-.phases {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.phases li {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
 }
 
 /* ---------- narrow panels ---------- */
@@ -1962,4 +1960,137 @@ details.guide ol {
     grid-template-columns: 1fr;
     gap: 26px;
   }
+}
+
+/* ---------- outcomes: intervention cards ---------- */
+.outcomes-body {
+  scroll-margin-top: 12px;
+}
+
+.solution-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.solution-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms var(--ease), box-shadow 180ms var(--ease), border-color 180ms var(--ease);
+}
+
+.solution-card:hover,
+.solution-card:focus-visible {
+  border-color: var(--gold);
+  box-shadow: 0 10px 26px rgba(19, 32, 58, 0.12);
+  transform: translateY(-2px);
+}
+
+.solution-card .eyebrow {
+  margin-top: 4px;
+}
+
+.solution-card-title {
+  color: var(--title);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.solution-card-teaser {
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.solution-card-more {
+  margin-top: auto;
+  padding-top: 6px;
+  color: var(--link);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sketch {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: var(--viz-surface);
+}
+
+.sketch .ink {
+  fill: none;
+  stroke: var(--title);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sketch .ink.thin {
+  stroke-width: 1.8;
+}
+
+.sketch .ink.dash {
+  stroke-dasharray: 3 5;
+}
+
+.sketch .fill-card {
+  fill: var(--card);
+}
+
+.sketch .fill-gold {
+  fill: rgba(255, 207, 1, 0.55);
+}
+
+.sketch .wash {
+  stroke: none;
+}
+
+.sketch .wash.gold {
+  fill: rgba(255, 207, 1, 0.3);
+}
+
+.sketch .wash.blue {
+  fill: rgba(104, 172, 229, 0.25);
+}
+
+.sketch .dot,
+.sketch .spark {
+  fill: var(--gold);
+  stroke: var(--title);
+  stroke-width: 1.2;
+}
+
+.sketch .label {
+  fill: var(--title);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.back-link {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.outcomes-body > .solution {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 0;
 }

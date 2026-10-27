@@ -507,6 +507,13 @@ a {
   pointer-events: none;
 }
 
+/* the line itself lets the map take the pointer; only its link is clickable */
+.smallprint a {
+  color: var(--link);
+  font-weight: 600;
+  pointer-events: auto;
+}
+
 /* ---------- labels in the 3D scene (positioned by LabelProjector) ---------- */
 .label-layer {
   position: absolute;
@@ -883,19 +890,6 @@ a {
   font-size: 12px;
 }
 
-.panel-foot {
-  display: flex;
-  justify-content: space-between;
-  padding: 14px 40px;
-  border-top: 1px solid var(--line);
-  font-size: 14px;
-}
-
-.panel-foot a {
-  font-weight: 600;
-  text-decoration: none;
-}
-
 /* ---------- narrower screens ---------- */
 @media (max-width: 1359px) {
   .overview {
@@ -947,10 +941,6 @@ a {
 
   .panel-body {
     padding: 16px 20px 32px;
-  }
-
-  .panel-foot {
-    padding: 12px 20px;
   }
 }
 

@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
-import { MODULE_ORDER, MODULES } from '../content/modules'
+import { MODULES } from '../content/modules'
 import { DMAIC, OVERVIEW, OVERVIEW_FOOTNOTE, PROJECT, TIMELINE } from '../content/overview'
 import { INTERVIEWS, PUBLISHED } from '../content/references'
 import type { ModuleKey } from '../data/campus'
-import { navigate, type Route } from '../router'
+import type { Route } from '../router'
 import { CloseIcon } from './icons'
 
 // module content loads on demand, keeping the first screen light
@@ -27,13 +27,9 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
   let title: string
   let sub: string | undefined
   let body: ReactNode
-  let foot: ReactNode = null
 
   if (route.name === 'module') {
     const m = MODULES[route.key]
-    const i = MODULE_ORDER.indexOf(route.key)
-    const prev = MODULE_ORDER[i - 1]
-    const next = MODULE_ORDER[i + 1]
     const Body = MODULE_BODIES[route.key]
     eyebrow = (
       <>
@@ -56,16 +52,6 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
           <Body />
         </Suspense>
       </>
-    )
-    foot = (
-      <nav className="panel-foot" aria-label="Tour">
-        {prev ? <TourLink to={prev} label={`← ${MODULES[prev].n} ${MODULES[prev].label}`} /> : <span />}
-        {next ? (
-          <TourLink to={next} label={`${MODULES[next].n} ${MODULES[next].label} →`} />
-        ) : (
-          <TourLink to="about" label="About the team →" />
-        )}
-      </nav>
     )
   } else if (route.name === 'overview') {
     eyebrow = 'Project overview'
@@ -103,12 +89,6 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
         </section>
         <p className="footnote">{OVERVIEW_FOOTNOTE}</p>
       </>
-    )
-    foot = (
-      <nav className="panel-foot" aria-label="Tour">
-        <span />
-        <TourLink to={MODULE_ORDER[0]} label={`Start the tour: ${MODULES[MODULE_ORDER[0]].n} ${MODULES[MODULE_ORDER[0]].label} →`} />
-      </nav>
     )
   } else {
     eyebrow = 'About'
@@ -192,21 +172,6 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
       <div className="panel-body" key={bodyKey}>
         {body}
       </div>
-      {foot}
     </aside>
-  )
-}
-
-function TourLink({ to, label }: { to: string; label: string }) {
-  return (
-    <a
-      href={`#/${to}`}
-      onClick={(e) => {
-        e.preventDefault()
-        navigate(to)
-      }}
-    >
-      {label}
-    </a>
   )
 }

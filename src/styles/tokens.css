@@ -1,0 +1,47 @@
+/* Design tokens: Johns Hopkins blues and gold, warm paper neutrals, and the night palette. */
+:root {
+  /* UI */
+  --hopkins-blue: #002d72;
+  --blue-700: #004b8d;
+  --blue-500: #4a6ea7;
+  --spirit-blue: #68ace5;
+  --shield-gray: #8b9dc7;
+  --gold: #ffcf01;
+  --paper: #f3f2ee;
+  --cream: #ffebc7;
+  --ink: #13203a;
+  --muted: #5b6577;
+  --line: rgba(0, 45, 114, 0.12);
+  --title: var(--hopkins-blue);
+  --link: var(--blue-700);
+  --page: #e3e8ec;
+  --panel: rgba(247, 246, 242, 0.97);
+  /* hourly hold bars in the time control */
+  --spark: rgba(0, 45, 114, 0.26);
+
+  --font-serif: 'Source Serif 4 Variable', 'Noto Serif SC', Georgia, serif;
+  --font-sans: 'Inter Variable', 'Noto Sans SC', system-ui, sans-serif;
+  --radius: 16px;
+  --glass: rgba(243, 242, 238, 0.8);
+  --shadow: 0 8px 30px rgba(19, 32, 58, 0.12);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* layout */
+  --gap: 20px;
+  --header-w: 330px;
+  --time-w: 292px;
+}
+
+/* After sunset the scene turns navy; the interface follows (driven by the time of day). */
+:root[data-theme='night'] {
+  --ink: #e9eef6;
+  --muted: #a8b3c5;
+  --line: rgba(255, 255, 255, 0.13);
+  --title: #eef2f8;
+  --link: #9cc9f0;
+  --page: #0e1b33;
+  --panel: rgba(16, 27, 48, 0.97);
+  --spark: rgba(104, 172, 229, 0.45);
+  --glass: rgba(15, 26, 46, 0.78);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}

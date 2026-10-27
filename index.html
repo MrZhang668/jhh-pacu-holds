@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reducing OR &amp; PACU Holds · JHH</title>
+    <meta
+      name="description"
+      content="Reducing OR and PACU holds at The Johns Hopkins Hospital: a JHU MSEM Team 6 project, explored through a 3D model of the East Baltimore campus."
+    />
+    <meta name="theme-color" content="#002d72" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Reducing OR &amp; PACU Holds at The Johns Hopkins Hospital" />
+    <meta
+      property="og:description"
+      content="A JHU MSEM Team 6 project on post-operative patient flow, explored through a 3D model of the East Baltimore campus."
+    />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
+    <meta property="og:image" content="%VITE_SITE_URL%og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Illustrated 3D model of The Johns Hopkins Hospital campus with the four project modules labelled."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <style>
+      /* loading screen: plain CSS so it shows before the app's styles and scripts arrive */
+      .boot {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 14px;
+        background: #e3e8ec;
+        color: #002d72;
+        font-family: Georgia, 'Times New Roman', serif;
+        transition:
+          opacity 600ms ease,
+          visibility 600ms;
+      }
+      .boot.night {
+        background: #0e1b33;
+        color: #cfe0f5;
+      }
+      .boot.is-done {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .boot-dome {
+        width: 112px;
+        height: 112px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .boot-dome path {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: boot-draw 900ms ease-out var(--d, 0ms) forwards;
+      }
+      .boot-dome circle {
+        fill: #ffcf01;
+        stroke: none;
+        opacity: 0;
+        animation: boot-fade 400ms ease 1500ms forwards;
+      }
+      @keyframes boot-draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      @keyframes boot-fade {
+        to {
+          opacity: 1;
+        }
+      }
+      .boot-title {
+        margin: 2px 0 0;
+        font-size: 19px;
+      }
+      .boot-bar {
+        width: 180px;
+        height: 2px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: color-mix(in srgb, currentColor 18%, transparent);
+      }
+      .boot-bar > span {
+        display: block;
+        height: 100%;
+        background: currentColor;
+        transform: scaleX(0.04);
+        transform-origin: left;
+        transition: transform 400ms ease;
+      }
+      .boot-note {
+        min-height: 1.4em;
+        margin: 0;
+        font:
+          12px/1.4 system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        letter-spacing: 0.03em;
+        opacity: 0.75;
+      }
+      .boot.is-error .boot-note {
+        color: #a3262a;
+        opacity: 1;
+      }
+      .boot.night.is-error .boot-note {
+        color: #ff9d9d;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-dome path,
+        .boot-dome circle {
+          animation: none;
+          stroke-dashoffset: 0;
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="boot" class="boot" role="status" aria-live="polite" aria-busy="true">
+      <!-- the Billings dome, drawn in line by line -->
+      <svg class="boot-dome" viewBox="0 0 120 120" aria-hidden="true">
+        <path pathLength="1" d="M10 106H110" />
+        <path pathLength="1" style="--d: 120ms" d="M20 106V80H100V106" />
+        <path pathLength="1" style="--d: 220ms" d="M15 80H105" />
+        <path pathLength="1" style="--d: 320ms" d="M29 101V87M38 101V87M82 101V87M91 101V87M52 106V92H68V106" />
+        <path pathLength="1" style="--d: 420ms" d="M41 80V60H79V80" />
+        <path pathLength="1" style="--d: 520ms" d="M47.5 77V64M53.8 77V64M60 77V64M66.2 77V64M72.5 77V64" />
+        <path pathLength="1" style="--d: 600ms" d="M37.5 60H82.5" />
+        <path pathLength="1" style="--d: 700ms" d="M42 60C42 45 50 36 60 33C70 36 78 45 78 60" />
+        <path pathLength="1" style="--d: 850ms" d="M55.5 33V25H64.5V33M53.5 25H66.5" />
+        <path pathLength="1" style="--d: 950ms" d="M60 25V11" />
+        <circle cx="60" cy="9.5" r="1.8" />
+      </svg>
+      <p class="boot-title">Reducing OR &amp; PACU Holds</p>
+      <div class="boot-bar"><span></span></div>
+      <p class="boot-note">Loading the campus model…</p>
+    </div>
+    <script>
+      // a shared link like ?time=21 opens at night: match the loading screen to it
+      ;(function () {
+        var t = new URLSearchParams(location.search).get('time')
+        if (t !== null && (Number(t) < 6 || Number(t) >= 18.5)) document.getElementById('boot').classList.add('night')
+      })()
+    </script>
+    <noscript>
+      <style>
+        .boot {
+          display: none;
+        }
+      </style>
+      <p style="padding: 24px; font-family: Georgia, serif">
+        This site needs JavaScript to show the 3D campus and the project modules.
+      </p>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

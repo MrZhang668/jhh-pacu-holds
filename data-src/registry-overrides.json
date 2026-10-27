@@ -1,0 +1,34 @@
+{
+  "_note": "Hand corrections on top of campus-registry.json (which is generated). Coordinates are local metres: x = east, z = south.",
+  "assign": {
+    "w1453470933": "park",
+    "w1453470934": "park",
+    "w1453470935": "park",
+    "w1493916728": "park",
+    "w1453470923": "hospital-bridge",
+    "w1453470924": "hospital-bridge"
+  },
+  "add": {
+    "hospital-bridge": { "name": "Hospital Bridge", "tier": "A" }
+  },
+  "names": {
+    "pctb": "Basic Science Complex (Preclinical Teaching · Wood Basic Science · Hunterian)"
+  },
+  "remove": [
+    "hurd", "harriet-lane", "traylor", "hunterian", "wbsb", "physiology", "rangos", "childrens-house"
+  ],
+  "includeMapOnly": true,
+  "mapOnlyShift": {
+    "_why": "the schematic map places Cooley ~12 m into Armstrong's real footprint; nudge it north",
+    "cooley": [0, -15]
+  },
+  "splitLobe": {
+    "w336286959": {
+      "_why": "OSM draws Welch Medical Library as a lobe of the basic-science complex outline",
+      "key": "welch",
+      "from": [217, -264],
+      "to": [217, -268],
+      "height": 20
+    }
+  }
+}

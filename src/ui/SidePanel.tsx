@@ -40,14 +40,16 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
     body = (
       <>
         <p className="lede">{m.lede}</p>
-        <ul className="facts">
-          {m.facts.map((f) => (
-            <li key={f.label}>
-              <b>{f.value}</b>
-              <span>{f.label}</span>
-            </li>
-          ))}
-        </ul>
+        {m.facts.length > 0 && (
+          <ul className="facts">
+            {m.facts.map((f) => (
+              <li key={f.label}>
+                <b>{f.value}</b>
+                <span>{f.label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
         <Suspense fallback={<p className="loading-inline">Loading…</p>}>
           <Body />
         </Suspense>

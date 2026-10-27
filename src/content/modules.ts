@@ -57,15 +57,11 @@ export const MODULES: Record<ModuleKey, ModuleInfo> = {
     n: '03',
     label: 'Mind Map',
     verb: 'Synthesize',
-    title: 'Mind Map · Issue Tree · Impact Matrix',
+    title: 'Problem Definition & Root Causes',
     building: 'welch',
     teaser: 'How we framed and ranked the problem',
     lede: 'Mapping the flow end to end showed delays cascading from the OR to the PACU to the inpatient units.',
-    facts: [
-      { value: 'DMAIC', label: 'Lean Six Sigma framework' },
-      { value: '4', label: 'issue-tree branches: OR, PACU, inpatient, hospital-wide' },
-      { value: '2', label: 'rounds of the impact × effort matrix' },
-    ],
+    facts: [],
     camera: { azimuth: -24, polar: 55, distance: 260, targetY: 8 },
   },
   outcomes: {

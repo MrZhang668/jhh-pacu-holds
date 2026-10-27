@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   EXAMPLES,
   HOME,
@@ -9,7 +9,6 @@ import {
   SUCCESS_FACTORS,
   VISION,
   type Solution,
-  type Step,
 } from '../content/outcomes'
 import { WORLD, WORLD_LAND } from '../content/worldLand'
 import { useTooltip } from './viz'
@@ -99,6 +98,7 @@ function SolutionCard({ s }: { s: Solution }) {
       <p className="eyebrow">Intervention {s.n}</p>
       <h3 className="solution-title">{s.title}</h3>
       <p>{s.summary}</p>
+      {(s.key === 'tracking' || s.key === 'cleaning') && <TapFlow flow={FLOWS[s.key]} />}
       {s.key === 'tracking' && <TapDemo />}
       {s.key === 'overlap' && <ShiftBars />}
       {s.key === 'cleaning' && <CleaningDemo />}
@@ -110,6 +110,8 @@ function SolutionCard({ s }: { s: Solution }) {
               <li key={h}>{h}</li>
             ))}
           </ol>
+        </div>
+        <div>
           <h4>Who does what</h4>
           <ul className="roles">
             {s.roles.map((r) => (
@@ -119,27 +121,264 @@ function SolutionCard({ s }: { s: Solution }) {
             ))}
           </ul>
         </div>
-        <div>
-          <h4>Cost</h4>
-          <table className="cost">
-            <tbody>
-              {s.cost.map((c) => (
-                <tr key={c.item}>
-                  <th scope="row">{c.item}</th>
-                  <td>{c.amount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {s.timeline && (
-            <>
-              <h4>Seven-week plan</h4>
-              <WeekPlan steps={s.timeline} />
-            </>
-          )}
-        </div>
       </div>
     </section>
+  )
+}
+
+// small line icons for the flowchart (24 × 24, drawn in currentColor)
+const icon = (body: ReactNode) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {body}
+  </svg>
+)
+const NFC = icon(
+  <>
+    <rect x="2.5" y="6" width="11" height="13" rx="2" />
+    <path d="M5.5 10h5M5.5 13h3" />
+    <path d="M16.5 9a4.5 4.5 0 0 1 0 6.5M19.3 6.5a8 8 0 0 1 0 11.5" />
+  </>,
+)
+const PERSON = icon(
+  <>
+    <circle cx="12" cy="8" r="3.5" />
+    <path d="M5 20.5c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+  </>,
+)
+const OR_LIGHT = icon(
+  <>
+    <path d="M12 2.5v3" />
+    <path d="M4.5 13a7.5 7.5 0 0 1 15 0z" />
+    <path d="M8 16.5l-1.5 3.5M12 16.5V20.5M16 16.5l1.5 3.5" />
+  </>,
+)
+const RECOVERY_BED = icon(
+  <>
+    <path d="M3 6v14M3 16h18v4M21 16v-3a3 3 0 0 0-3-3h-7v6" />
+    <circle cx="7" cy="12.5" r="2" />
+  </>,
+)
+const WARD = icon(
+  <>
+    <rect x="4" y="4" width="16" height="16.5" rx="1.5" />
+    <path d="M12 7.5v5M9.5 10h5M10 20.5v-3.5h4v3.5" />
+  </>,
+)
+const EPIC = icon(
+  <>
+    <ellipse cx="12" cy="5.5" rx="7" ry="2.5" />
+    <path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5" />
+  </>,
+)
+const BOARD = icon(
+  <>
+    <rect x="2.5" y="3.5" width="19" height="13" rx="1.5" />
+    <path d="M6.5 7.5h6M6.5 10.5h9M6.5 13.5h4M8 20.5h8M12 16.5v4" />
+  </>,
+)
+const CHECK = icon(
+  <>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M8 12.3l2.7 2.7L16 9.5" />
+  </>,
+)
+const REUSE = icon(
+  <>
+    <path d="M20 12a8 8 0 1 1-2.4-5.7" />
+    <path d="M20 3.5v4.5h-4.5" />
+  </>,
+)
+
+const BROOM = icon(
+  <>
+    <path d="M16.5 2.5l-4 8.5" />
+    <path d="M7 11h9l2.5 10h-14z" />
+    <path d="M9 15.5l-.8 5.5M12 15.5v5.5M15 15.5l.8 5.5" />
+  </>,
+)
+const CHART = icon(
+  <>
+    <path d="M3.5 20.5h17" />
+    <path d="M6.5 17v-5M11 17V7.5M15.5 17v-7M20 17V4.5" />
+  </>,
+)
+
+interface FlowStep {
+  text: string
+  /** an NFC tap; other steps happen in Epic, or are the outcome (done) */
+  tap?: boolean
+  done?: boolean
+}
+
+interface FlowStage {
+  dept: string
+  icon: ReactNode
+  who: string
+  steps: FlowStep[]
+  /** outlined in gold, with this label at the bottom */
+  tag?: string
+}
+
+/** What drops from a department into Epic (or rises from Epic into it), under each department. */
+interface FlowDrop {
+  label: string
+  tap?: boolean
+  up?: boolean
+}
+
+interface Flow {
+  label: string
+  stages: [FlowStage, FlowStage, FlowStage]
+  drops: [FlowDrop | null, FlowDrop | null, FlowDrop | null]
+  epic: string
+  outputs: { icon: ReactNode; who: string; text: string }[]
+  note: { icon: ReactNode; text: string }
+}
+
+/**
+ * An intervention as a picture: departments left to right with who does what, every NFC tap drops into
+ * Epic, and Epic tells the people who act on it without a phone call.
+ */
+const FLOWS: Record<'tracking' | 'cleaning', Flow> = {
+  tracking: {
+    label: 'How NFC patient tracking moves information from the bedside to the bed manager',
+    stages: [
+      { dept: 'Operating room', icon: OR_LIGHT, who: 'OR team', steps: [{ text: 'Card linked to the patient’s encounter before surgery' }] },
+      {
+        dept: 'PACU',
+        icon: RECOVERY_BED,
+        who: 'PACU nurse',
+        tag: 'Where holds build up',
+        steps: [
+          { text: 'Arrived in PACU', tap: true },
+          { text: 'Ready for transfer', tap: true },
+          { text: 'Departed PACU', tap: true },
+        ],
+      },
+      { dept: 'Inpatient unit', icon: WARD, who: 'Receiving nurse', steps: [{ text: 'Bed assigned and room ready before the patient arrives', done: true }] },
+    ],
+    drops: [{ label: 'card ID' }, { label: 'every tap', tap: true }, { label: 'status', up: true }],
+    epic: 'logs every tap with the time and the location, with no manual status entry',
+    outputs: [
+      { icon: BOARD, who: 'Command Center · bed manager', text: 'sees “Ready for transfer” on the board at once and assigns a bed' },
+      { icon: PERSON, who: 'Inpatient unit · charge nurse', text: 'sees the patient coming and has the room and a nurse ready' },
+    ],
+    note: { icon: REUSE, text: 'Once the patient leaves the PACU, the card is wiped and reused for the next patient.' },
+  },
+  cleaning: {
+    label: 'How the NFC bed-cleaning status moves information from the room to the bed manager',
+    stages: [
+      { dept: 'Inpatient unit', icon: WARD, who: 'Unit nurse', steps: [{ text: 'Patient discharged, room flagged for cleaning' }] },
+      {
+        dept: 'Room cleaning',
+        icon: BROOM,
+        who: 'EVS staff',
+        tag: '7-minute safeguard',
+        steps: [
+          { text: 'Cleaning in progress', tap: true },
+          { text: 'Cleaning finished', tap: true },
+        ],
+      },
+      { dept: 'PACU', icon: RECOVERY_BED, who: 'PACU nurse', steps: [{ text: 'Held patient moves into the clean room sooner', done: true }] },
+    ],
+    drops: [{ label: 'discharge' }, { label: 'both taps', tap: true }, { label: 'room assigned', up: true }],
+    epic: 'turns the taps into the room’s status: Cleaning in progress → Ready to assign',
+    outputs: [
+      { icon: BOARD, who: 'Command Center · bed manager', text: 'sees “Ready to assign” at once, without waiting for a call, and gives the room to a held patient' },
+      { icon: CHART, who: 'EVS supervisor', text: 'sees cleaning times by shift on the dashboard' },
+    ],
+    note: { icon: NFC, text: 'Cards come from a shared pool handed out at the start of each shift.' },
+  },
+}
+
+const RightArrow = () => (
+  <div className="nf-arrow" aria-hidden="true">
+    <svg viewBox="0 0 26 24" width="26" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12h21M17 6l6 6-6 6" />
+    </svg>
+  </div>
+)
+
+function Stage({ stage }: { stage: FlowStage }) {
+  return (
+    <div className={`nf-stage${stage.tag ? ' is-hold' : ''}`}>
+      <p className="nf-dept">
+        <span className="nf-badge">{stage.icon}</span>
+        {stage.dept}
+      </p>
+      <p className="nf-who">
+        {PERSON}
+        {stage.who}
+      </p>
+      <ol className="nf-steps">
+        {stage.steps.map((st) => (
+          <li key={st.text} className={st.tap ? 'is-tap' : undefined}>
+            <span className="nf-chip">{st.tap ? NFC : st.done ? CHECK : EPIC}</span>
+            <span>
+              {st.tap && <b>Tap: </b>}
+              {st.text}
+            </span>
+          </li>
+        ))}
+      </ol>
+      {stage.tag && <p className="nf-hold-tag">{stage.tag}</p>}
+    </div>
+  )
+}
+
+function TapFlow({ flow }: { flow: Flow }) {
+  const [a, b, c] = flow.stages
+  return (
+    <figure className="nfc-flow" aria-label={flow.label}>
+      <div className="nf-lanes">
+        <Stage stage={a} />
+        <RightArrow />
+        <Stage stage={b} />
+        <RightArrow />
+        <Stage stage={c} />
+      </div>
+
+      <div className="nf-feed" aria-hidden="true">
+        {flow.drops.flatMap((d, i) => [
+          ...(i ? [<span key={`gap${i}`} />] : []),
+          d ? (
+            <span key={d.label} className={`nf-drop${d.tap ? ' is-tap' : ''}${d.up ? ' is-up' : ''}`}>
+              <span>
+                {d.tap && NFC}
+                {d.label}
+              </span>
+            </span>
+          ) : (
+            <span key={`none${i}`} />
+          ),
+        ])}
+      </div>
+
+      <div className="nf-epic">
+        <span className="nf-badge">{EPIC}</span>
+        <p>
+          <b>Epic</b>
+          <span>{flow.epic}</span>
+        </p>
+      </div>
+
+      <div className="nf-outputs">
+        {flow.outputs.map((o) => (
+          <div key={o.who} className="nf-out">
+            <span className="nf-badge is-light">{o.icon}</span>
+            <p>
+              <b>{o.who}</b>
+              <span>{o.text}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <figcaption className="nf-reuse">
+        {flow.note.icon}
+        {flow.note.text}
+      </figcaption>
+    </figure>
   )
 }
 
@@ -275,32 +514,6 @@ function CleaningDemo() {
         <span>Command Center</span>
         {message || 'Waiting for the first tap.'}
       </p>
-    </div>
-  )
-}
-
-function WeekPlan({ steps }: { steps: Step[] }) {
-  return (
-    <div className="weekplan" role="table" aria-label="Seven-week plan">
-      <div className="wp-row wp-head" role="row">
-        <span role="columnheader">Step</span>
-        {[1, 2, 3, 4, 5, 6, 7].map((w) => (
-          <span key={w} role="columnheader">
-            W{w}
-          </span>
-        ))}
-      </div>
-      {steps.map((s) => (
-        <div className="wp-row" role="row" key={s.text}>
-          <span role="rowheader">{s.text}</span>
-          <span
-            className="wp-bar"
-            role="cell"
-            aria-label={s.week[0] === s.week[1] ? `week ${s.week[0]}` : `weeks ${s.week[0]} to ${s.week[1]}`}
-            style={{ gridColumn: `${s.week[0] + 1} / ${s.week[1] + 2}` }}
-          />
-        </div>
-      ))}
     </div>
   )
 }

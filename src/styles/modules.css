@@ -1319,27 +1319,6 @@ details.guide ol {
   margin-bottom: 4px;
 }
 
-table.cost {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-table.cost th,
-table.cost td {
-  padding: 6px 0;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  font-weight: 400;
-}
-
-table.cost td {
-  padding-left: 10px;
-  font-weight: 600;
-  text-align: right;
-  white-space: nowrap;
-}
-
 .demo {
   margin-top: 14px;
   padding: 16px;
@@ -1506,35 +1485,6 @@ table.cost td {
   background: rgba(255, 207, 1, 0.35);
 }
 
-.weekplan {
-  display: grid;
-  gap: 4px;
-  font-size: 12.5px;
-}
-
-.wp-row {
-  display: grid;
-  grid-template-columns: minmax(130px, 1.6fr) repeat(7, minmax(0, 1fr));
-  gap: 2px;
-  align-items: center;
-}
-
-.wp-head span {
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
-}
-
-.wp-head span:first-child {
-  text-align: left;
-}
-
-.wp-bar {
-  height: 14px;
-  border-radius: 4px;
-  background: var(--viz-1);
-}
-
 .world {
   position: relative;
   margin-top: 6px;
@@ -1686,5 +1636,330 @@ table.cost td {
   .flow-patient,
   .flow-hold {
     animation: none;
+  }
+}
+
+/* ---------- intervention 1: NFC tracking flowchart ---------- */
+.nfc-flow {
+  --nf-card: #ffffff;
+  --nf-soft: rgba(0, 45, 114, 0.07);
+  --nf-epic: var(--hopkins-blue);
+  container-type: inline-size;
+  margin: 18px 0 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--viz-surface);
+}
+
+:root[data-theme='night'] .nfc-flow {
+  --nf-card: #1b2a45;
+  --nf-soft: rgba(104, 172, 229, 0.12);
+  --nf-epic: #0b3b80;
+}
+
+.nfc-flow p {
+  margin: 0;
+}
+
+.nf-lanes,
+.nf-feed {
+  display: grid;
+  grid-template-columns: 1fr 30px 1.15fr 30px 1fr;
+}
+
+.nf-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--nf-card);
+}
+
+.nf-stage.is-hold {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.nf-dept {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: var(--title);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.nf-badge {
+  display: grid;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--hopkins-blue);
+  color: #fff;
+}
+
+.nf-badge.is-light {
+  background: var(--nf-soft);
+  color: var(--title);
+}
+
+.nf-who {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  align-self: flex-start;
+  padding: 2px 10px 2px 5px;
+  border-radius: 999px;
+  background: var(--nf-soft);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nf-who svg {
+  width: 17px;
+  height: 17px;
+}
+
+.nf-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.nf-steps li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nf-chip {
+  display: grid;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--nf-soft);
+  color: var(--title);
+}
+
+.nf-chip svg {
+  width: 19px;
+  height: 19px;
+}
+
+.nf-steps li.is-tap .nf-chip {
+  background: var(--gold);
+  color: var(--hopkins-blue);
+}
+
+.nf-hold-tag {
+  margin-top: auto !important;
+  color: #9a6a00;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+:root[data-theme='night'] .nf-hold-tag {
+  color: var(--gold);
+}
+
+.nf-arrow {
+  display: grid;
+  place-items: center;
+  color: var(--blue-500);
+}
+
+/* the drops: from a department down into Epic (or up out of it) */
+.nf-feed {
+  height: 46px;
+}
+
+.nf-drop {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  color: var(--blue-500);
+  font-size: 11px;
+  font-weight: 600;
+  isolation: isolate;
+}
+
+.nf-drop::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: -1;
+  border-left: 2px dashed var(--spirit-blue);
+  content: '';
+}
+
+.nf-drop::after {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - 5px);
+  border-top: 7px solid var(--spirit-blue);
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  content: '';
+}
+
+.nf-drop.is-up::after {
+  top: 0;
+  bottom: auto;
+  border-top: 0;
+  border-bottom: 7px solid var(--spirit-blue);
+}
+
+.nf-drop > span {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 1px 6px;
+  background: var(--viz-surface);
+}
+
+.nf-drop svg {
+  width: 18px;
+  height: 18px;
+  padding: 1px;
+  border-radius: 4px;
+  background: var(--gold);
+  color: var(--hopkins-blue);
+}
+
+.nf-epic {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--nf-epic);
+  color: #fff;
+}
+
+.nf-epic .nf-badge {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.nf-epic p,
+.nf-out p {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.nf-epic b {
+  font-size: 15px;
+}
+
+.nf-epic span {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.nf-outputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.nf-out {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--nf-card);
+}
+
+/* each output hangs off Epic by a short arrow */
+.nf-out::before {
+  position: absolute;
+  top: -26px;
+  left: 30px;
+  height: 18px;
+  border-left: 2px solid var(--spirit-blue);
+  content: '';
+}
+
+.nf-out::after {
+  position: absolute;
+  top: -10px;
+  left: 25px;
+  border-top: 7px solid var(--spirit-blue);
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  content: '';
+}
+
+.nf-out b {
+  color: var(--title);
+}
+
+.nf-out span {
+  color: var(--muted);
+}
+
+.nf-reuse {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.nf-reuse svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* narrow panels: departments stack, arrows point down, Epic still collects every tap */
+@container (max-width: 560px) {
+  .nf-lanes {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-arrow {
+    height: 30px;
+  }
+
+  .nf-arrow svg {
+    transform: rotate(90deg);
+  }
+
+  .nf-feed {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-feed > :not(.is-tap) {
+    display: none;
+  }
+
+  .nf-outputs {
+    grid-template-columns: 1fr;
+    gap: 26px;
   }
 }

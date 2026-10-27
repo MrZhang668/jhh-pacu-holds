@@ -18,11 +18,6 @@ export const ROOT_CAUSES = [
   },
 ]
 
-export interface Step {
-  week: [number, number]
-  text: string
-}
-
 export interface Solution {
   key: 'tracking' | 'overlap' | 'cleaning'
   n: string
@@ -30,8 +25,6 @@ export interface Solution {
   summary: string
   how: string[]
   roles: { who: string; does: string }[]
-  cost: { item: string; amount: string }[]
-  timeline?: Step[]
 }
 
 export const SOLUTIONS: Solution[] = [
@@ -51,18 +44,6 @@ export const SOLUTIONS: Solution[] = [
       { who: 'Command Center leadership', does: 'submit the Epic ticket for card linking and automatic location updates' },
       { who: 'Epic analysts', does: 'build “tap to update location” and map card IDs to encounters' },
     ],
-    cost: [
-      { item: '60 NFC cards (Weinberg 3 has 28 beds, Zayed 5 has 24; cards are reused)', amount: '$36' },
-      { item: 'NFC readers (already at every bedside)', amount: '$0' },
-      { item: 'Training: a 30-minute huddle per unit', amount: 'staff time' },
-    ],
-    timeline: [
-      { week: [1, 1], text: 'Epic ticket submitted' },
-      { week: [2, 4], text: 'Epic build and internal testing' },
-      { week: [4, 5], text: 'Soft launch on Weinberg 3' },
-      { week: [6, 6], text: 'Launch on Zayed 5' },
-      { week: [7, 7], text: 'Review the workflow data' },
-    ],
   },
   {
     key: 'overlap',
@@ -79,7 +60,6 @@ export const SOLUTIONS: Solution[] = [
       { who: 'Inpatient nurse managers', does: 'build the paired schedules and staff the overlap' },
       { who: 'Charge nurses', does: 'route PACU arrivals to the nurses not in report' },
     ],
-    cost: [{ item: 'Rescheduling within existing staff', amount: '$0' }],
   },
   {
     key: 'cleaning',
@@ -96,18 +76,6 @@ export const SOLUTIONS: Solution[] = [
       { who: 'EVS supervisors', does: 'bring the cards into the cleaning routine and train every shift' },
       { who: 'Command Center leadership', does: 'submit the Epic ticket for the two-tap logic' },
       { who: 'Epic analysts', does: 'build the status change, the 7-minute safeguard and the dashboards' },
-    ],
-    cost: [
-      { item: 'A pool of 20 NFC cards, handed out each shift', amount: '$12' },
-      { item: 'Tap-enabled workstations (already on every unit)', amount: '$0' },
-      { item: 'Training: 30 minutes in shift meetings', amount: 'staff time' },
-    ],
-    timeline: [
-      { week: [1, 1], text: 'Epic ticket submitted' },
-      { week: [2, 4], text: 'Epic build and internal testing' },
-      { week: [4, 5], text: 'Soft launch with one EVS shift' },
-      { week: [6, 6], text: 'Full roll-out across coverage zones' },
-      { week: [7, 7], text: 'Performance review' },
     ],
   },
 ]

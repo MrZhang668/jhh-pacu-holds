@@ -5,22 +5,27 @@ import { DAY_SECONDS, formatHour, timeStore, useHours, usePlaying } from '../sta
 import { MoonIcon, PauseIcon, PlayIcon, SunIcon } from './icons'
 
 /** Day/night switch, a 24-hour scrubber with play, and the hourly hold profile above it. */
-export function TimeControls() {
+export function TimeControls({ panelOpen }: { panelOpen: boolean }) {
   const hours = useHours()
   const playing = usePlaying()
 
   useEffect(() => {
     if (!playing) return
+    // every step redraws the scene: ~30 a second on the map, ~10 while a panel covers most of it
+    const step = 1000 / (panelOpen ? 10 : 30)
     let raf = 0
     let last = performance.now()
     const tick = (now: number) => {
-      timeStore.set(timeStore.get() + ((now - last) / 1000) * (24 / DAY_SECONDS))
-      last = now
+      if (now - last >= step) {
+        // a background tab stops animation frames; carry on from there instead of jumping ahead
+        timeStore.set(timeStore.get() + (Math.min(now - last, 250) / 1000) * (24 / DAY_SECONDS))
+        last = now
+      }
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [playing])
+  }, [playing, panelOpen])
 
   const night = sunElevation(hours) < 0
   const jump = (h: number) => {

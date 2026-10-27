@@ -5,9 +5,14 @@ import { useSyncExternalStore } from 'react'
  * lights, PACU floor glow). The scene reads it inside useFrame, so playback does not re-render React.
  */
 // ?time=19 opens the scene at 7 PM (handy for sharing the shift-change moment)
-const linked = new URLSearchParams(window.location.search).get('time')
+const params = new URLSearchParams(window.location.search)
+const linked = params.get('time')
 let hours = linked !== null && Number(linked) >= 0 && Number(linked) < 24 ? Number(linked) : 14
-let playing = false
+// the clock runs by itself, a day a minute, unless a link or a still capture pins the hour. Phones and
+// reduced motion start paused, like the ambient life, because every step redraws the scene.
+const pinned = linked !== null || params.has('capture')
+const calm = window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 767px), (pointer: coarse)').matches
+let playing = !pinned && !calm
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((l) => l())
 

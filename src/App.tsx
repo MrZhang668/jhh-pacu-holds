@@ -191,7 +191,7 @@ export default function App() {
 
       <div className="top-left">
         <Header />
-        {webgl && <TimeControls />}
+        {webgl && <TimeControls panelOpen={panelOpen} />}
       </div>
       {!panelOpen && <OverviewPanel collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />}
       {webgl && (

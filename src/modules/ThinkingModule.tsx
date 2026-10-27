@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { DMAIC_DETAIL, FLOW, ISSUE_TREE, MATRIX, MATRIX_TAKEAWAY, type TreeNode } from '../content/thinking'
+import { DMAIC_DETAIL, ISSUE_TREE, MATRIX, MATRIX_TAKEAWAY, type TreeNode } from '../content/thinking'
+import { WorkflowScene } from './WorkflowScene'
 
 type Tab = 'flow' | 'tree' | 'matrix' | 'dmaic'
 const TABS: { key: Tab; label: string }[] = [
@@ -46,71 +47,15 @@ export default function ThinkingModule() {
   )
 }
 
-/** Appendix A redrawn: the patient chain, what loads each step, and a patient moving through it. */
+/** Appendix A redrawn: one patient's path, step by step, with what loads each step behind icons. */
 function FlowMap() {
-  const [run, setRun] = useState(0)
-  const card = (title: string, items: string[], tone?: string) => (
-    <div className={`flow-card${tone ? ` ${tone}` : ''}`}>
-      <b>{title}</b>
-      <ul>
-        {items.map((i) => (
-          <li key={i}>{i}</li>
-        ))}
-      </ul>
-    </div>
-  )
   return (
     <section>
       <p>
-        We drew the whole path a surgical patient takes and everything that loads each step. Holds appear at the hand-offs,
-        where one unit waits on another.
+        We followed one surgical patient from the OR to home. Holds appear at the hand-offs, where one unit waits on
+        another. Glowing icons matter at the current step; tap any icon to see what loads it.
       </p>
-      <div className="flow">
-        <div className="flow-row flow-top">
-          {card('OR load', FLOW.orInputs)}
-          {card('PACU nurses', FLOW.nurse, 'is-nurse')}
-          {card('Inpatient nurses', FLOW.nurse, 'is-nurse')}
-          <span />
-        </div>
-        <div className="flow-row flow-chain" key={run}>
-          {FLOW.stages.map((s, i) => (
-            <div key={s} className={`flow-stage${i === 3 ? ' is-end' : ''}`}>
-              <span>{s}</span>
-            </div>
-          ))}
-          {['t1', 't2'].map((t) => (
-            <span key={t} className={`flow-transfer ${t}`}>
-              <small>Transfer</small>
-              {FLOW.transfer.map((x) => x.replace('Transfer ', '')).join(' · ')}
-            </span>
-          ))}
-          <span className="flow-patient" aria-hidden="true" />
-          <span className="flow-hold" aria-hidden="true">
-            hold
-          </span>
-        </div>
-        <div className="flow-row flow-bottom">
-          <span />
-          <div className="flow-stack">
-            {card('Bed manager', FLOW.bedManager, 'is-bed')}
-            {card('Beds', FLOW.bed, 'is-bed')}
-          </div>
-          <div className="flow-stack">
-            {card('Bed manager', FLOW.bedManager, 'is-bed')}
-            {card('Beds', FLOW.bed, 'is-bed')}
-          </div>
-          <span />
-        </div>
-      </div>
-      <div className="flow-foot">
-        <p>
-          The moving dot is one patient. It stalls between the PACU and the inpatient unit — ready to move, but waiting for a
-          clean, assigned bed and a nurse who is free.
-        </p>
-        <button type="button" className="link-button" onClick={() => setRun((n) => n + 1)}>
-          Replay
-        </button>
-      </div>
+      <WorkflowScene />
     </section>
   )
 }

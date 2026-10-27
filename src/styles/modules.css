@@ -799,198 +799,6 @@ details.guide ol {
   margin-top: 18px;
 }
 
-.flow {
-  display: grid;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--viz-surface);
-}
-
-.flow-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.flow-card {
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--card);
-  font-size: 12px;
-}
-
-.flow-card b {
-  font-size: 12.5px;
-}
-
-.flow-card ul {
-  margin: 4px 0 0;
-  padding-left: 16px;
-  line-height: 1.5;
-}
-
-.flow-card.is-nurse {
-  border-top: 3px solid var(--spirit-blue);
-}
-
-.flow-card.is-bed {
-  border-top: 3px solid var(--viz-2);
-}
-
-.flow-stack {
-  display: grid;
-  gap: 8px;
-}
-
-/* stages sit on the upper line; the patient travels on a track just below them */
-.flow-chain {
-  --chain-y: 44px;
-  --track-y: 104px;
-  position: relative;
-  height: 136px;
-  align-items: start;
-  padding-top: 6px;
-}
-
-.flow-chain::before,
-.flow-chain::after {
-  content: '';
-  position: absolute;
-  right: 12.5%;
-  left: 12.5%;
-  height: 2px;
-  background: var(--viz-axis);
-}
-
-.flow-chain::before {
-  top: var(--chain-y);
-}
-
-.flow-chain::after {
-  top: var(--track-y);
-  height: 0;
-  border-top: 2px dotted var(--viz-axis);
-  background: none;
-}
-
-.flow-stage {
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-
-.flow-stage span {
-  display: grid;
-  width: 76px;
-  height: 76px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--hopkins-blue);
-  color: #fff;
-  font-size: 12.5px;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.flow-stage.is-end span {
-  border-radius: 10px;
-  transform: rotate(45deg) scale(0.78);
-}
-
-.flow-transfer {
-  position: absolute;
-  top: calc(var(--chain-y) - 30px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: var(--muted);
-  font-size: 10.5px;
-  line-height: 1.2;
-  white-space: nowrap;
-  transform: translateX(-50%);
-}
-
-.flow-transfer small {
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.flow-transfer.t1 {
-  left: 25%;
-}
-
-.flow-transfer.t2 {
-  left: 50%;
-}
-
-.flow-patient {
-  position: absolute;
-  top: calc(var(--track-y) - 9px);
-  left: 12.5%;
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  border: 3px solid var(--viz-surface);
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 0 0 rgba(255, 207, 1, 0.6);
-  animation: patient-path 14s var(--ease) infinite;
-}
-
-.flow-hold {
-  position: absolute;
-  top: calc(var(--track-y) + 12px);
-  left: 50%;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--gold);
-  color: #13203a;
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0;
-  transform: translateX(-50%);
-  animation: hold-tag 14s linear infinite;
-}
-
-@keyframes patient-path {
-  0% { left: 12.5%; }
-  12% { left: 37.5%; }
-  30% { left: 37.5%; }
-  /* ready to move, but no bed and no free nurse: the hold */
-  34% { left: 44%; box-shadow: 0 0 0 0 rgba(255, 207, 1, 0.6); }
-  44% { left: 46%; box-shadow: 0 0 0 10px rgba(255, 207, 1, 0); }
-  56% { left: 46%; box-shadow: 0 0 0 0 rgba(255, 207, 1, 0.6); }
-  66% { left: 62.5%; box-shadow: none; }
-  82% { left: 62.5%; }
-  94% { left: 87.5%; }
-  100% { left: 87.5%; }
-}
-
-@keyframes hold-tag {
-  0%, 32% { opacity: 0; left: 45%; }
-  36%, 56% { opacity: 1; left: 45%; }
-  60%, 100% { opacity: 0; left: 45%; }
-}
-
-.flow-foot {
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.flow-foot p {
-  margin: 0 !important;
-}
-
 .tree-tools {
   display: flex;
   flex-wrap: wrap;
@@ -1280,20 +1088,6 @@ details.guide ol {
   margin-bottom: 4px;
 }
 
-.demo {
-  margin-top: 14px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--viz-surface);
-}
-
-.demo-actions {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
 .demo-button {
   padding: 8px 16px;
   border: 0;
@@ -1304,147 +1098,6 @@ details.guide ol {
   font-weight: 600;
 }
 
-.demo-button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.demo-log {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.demo-log li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  border: 1px dashed var(--line);
-  border-radius: 10px;
-  color: var(--muted);
-  font-size: 13px;
-  transition: all 300ms var(--ease);
-}
-
-.demo-log li.is-done {
-  border-style: solid;
-  border-color: var(--viz-1);
-  color: var(--ink);
-}
-
-.demo-log time {
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.demo-board {
-  display: flex;
-  gap: 10px;
-  align-items: baseline;
-  margin: 12px 0 0 !important;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--card);
-  font-size: 13.5px;
-}
-
-.demo-board span {
-  flex-shrink: 0;
-  color: var(--muted);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.state-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 0 0 12px;
-  padding: 0;
-  list-style: none;
-}
-
-.state-row li {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  color: var(--muted);
-  font-size: 13px;
-  transition: all 300ms var(--ease);
-}
-
-.state-row li.is-current {
-  border-color: var(--viz-1);
-  background: var(--viz-1);
-  color: #fff;
-  font-weight: 600;
-}
-
-.shift-bars {
-  margin: 14px 0 0;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--viz-surface);
-}
-
-.shift-bars svg {
-  width: 100%;
-  height: auto;
-}
-
-.shift-bars .row-label {
-  fill: var(--ink);
-  font-size: 12px;
-}
-
-.shift-bars .night {
-  fill: var(--viz-track);
-}
-
-.shift-bars .day {
-  fill: var(--viz-1);
-  opacity: 0.85;
-}
-
-.shift-bars .handoff {
-  fill: var(--viz-accent);
-}
-
-.shift-bars .window {
-  fill: rgba(255, 207, 1, 0.22);
-}
-
-.shift-bars .tick {
-  fill: var(--muted);
-  font-size: 11px;
-}
-
-.shift-bars figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
-.k-handoff {
-  background: var(--viz-accent);
-}
-
-.k-window {
-  background: rgba(255, 207, 1, 0.35);
-}
 
 .world {
   position: relative;
@@ -1597,356 +1250,16 @@ details.guide ol {
     display: none;
   }
 
-  .flow-row {
-    grid-template-columns: 1fr 1fr;
-  }
 
-  .flow-top > :last-child,
-  .flow-bottom > :first-child,
-  .flow-bottom > :last-child {
-    display: none;
-  }
-
-  .demo-log,
-  .state-row {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flow-patient,
-  .flow-hold,
   .sh-detail {
     animation: none;
   }
 
   .sh-node:hover {
     transform: none;
-  }
-}
-
-/* ---------- intervention 1: NFC tracking flowchart ---------- */
-.nfc-flow {
-  --nf-card: #ffffff;
-  --nf-soft: rgba(0, 45, 114, 0.07);
-  --nf-epic: var(--hopkins-blue);
-  container-type: inline-size;
-  margin: 18px 0 8px;
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--viz-surface);
-}
-
-:root[data-theme='night'] .nfc-flow {
-  --nf-card: #1b2a45;
-  --nf-soft: rgba(104, 172, 229, 0.12);
-  --nf-epic: #0b3b80;
-}
-
-.nfc-flow p {
-  margin: 0;
-}
-
-.nf-lanes,
-.nf-feed {
-  display: grid;
-  grid-template-columns: 1fr 30px 1.15fr 30px 1fr;
-}
-
-.nf-stage {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--nf-card);
-}
-
-.nf-stage.is-hold {
-  border-color: var(--gold);
-  box-shadow: inset 0 0 0 1px var(--gold);
-}
-
-.nf-dept {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  color: var(--title);
-  font-family: var(--font-serif);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.nf-badge {
-  display: grid;
-  flex: none;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--hopkins-blue);
-  color: #fff;
-}
-
-.nf-badge.is-light {
-  background: var(--nf-soft);
-  color: var(--title);
-}
-
-.nf-who {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
-  align-self: flex-start;
-  padding: 2px 10px 2px 5px;
-  border-radius: 999px;
-  background: var(--nf-soft);
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.nf-who svg {
-  width: 17px;
-  height: 17px;
-}
-
-.nf-steps {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.nf-steps li {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.nf-chip {
-  display: grid;
-  flex: none;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 8px;
-  background: var(--nf-soft);
-  color: var(--title);
-}
-
-.nf-chip svg {
-  width: 19px;
-  height: 19px;
-}
-
-.nf-steps li.is-tap .nf-chip {
-  background: var(--gold);
-  color: var(--hopkins-blue);
-}
-
-.nf-hold-tag {
-  margin-top: auto !important;
-  color: #9a6a00;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-:root[data-theme='night'] .nf-hold-tag {
-  color: var(--gold);
-}
-
-.nf-arrow {
-  display: grid;
-  place-items: center;
-  color: var(--blue-500);
-}
-
-/* the drops: from a department down into Epic (or up out of it) */
-.nf-feed {
-  height: 46px;
-}
-
-.nf-drop {
-  position: relative;
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-  align-items: center;
-  color: var(--blue-500);
-  font-size: 11px;
-  font-weight: 600;
-  isolation: isolate;
-}
-
-.nf-drop::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  z-index: -1;
-  border-left: 2px dashed var(--spirit-blue);
-  content: '';
-}
-
-.nf-drop::after {
-  position: absolute;
-  bottom: 0;
-  left: calc(50% - 5px);
-  border-top: 7px solid var(--spirit-blue);
-  border-right: 6px solid transparent;
-  border-left: 6px solid transparent;
-  content: '';
-}
-
-.nf-drop.is-up::after {
-  top: 0;
-  bottom: auto;
-  border-top: 0;
-  border-bottom: 7px solid var(--spirit-blue);
-}
-
-.nf-drop > span {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-  padding: 1px 6px;
-  background: var(--viz-surface);
-}
-
-.nf-drop svg {
-  width: 18px;
-  height: 18px;
-  padding: 1px;
-  border-radius: 4px;
-  background: var(--gold);
-  color: var(--hopkins-blue);
-}
-
-.nf-epic {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: var(--nf-epic);
-  color: #fff;
-}
-
-.nf-epic .nf-badge {
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.nf-epic p,
-.nf-out p {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.nf-epic b {
-  font-size: 15px;
-}
-
-.nf-epic span {
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.nf-outputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 26px;
-}
-
-.nf-out {
-  position: relative;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--nf-card);
-}
-
-/* each output hangs off Epic by a short arrow */
-.nf-out::before {
-  position: absolute;
-  top: -26px;
-  left: 30px;
-  height: 18px;
-  border-left: 2px solid var(--spirit-blue);
-  content: '';
-}
-
-.nf-out::after {
-  position: absolute;
-  top: -10px;
-  left: 25px;
-  border-top: 7px solid var(--spirit-blue);
-  border-right: 6px solid transparent;
-  border-left: 6px solid transparent;
-  content: '';
-}
-
-.nf-out b {
-  color: var(--title);
-}
-
-.nf-out span {
-  color: var(--muted);
-}
-
-.nf-reuse {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 14px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.nf-reuse svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* narrow panels: departments stack, arrows point down, Epic still collects every tap */
-@container (max-width: 560px) {
-  .nf-lanes {
-    grid-template-columns: 1fr;
-  }
-
-  .nf-arrow {
-    height: 30px;
-  }
-
-  .nf-arrow svg {
-    transform: rotate(90deg);
-  }
-
-  .nf-feed {
-    grid-template-columns: 1fr;
-  }
-
-  .nf-feed > :not(.is-tap) {
-    display: none;
-  }
-
-  .nf-outputs {
-    grid-template-columns: 1fr;
-    gap: 26px;
   }
 }
 
@@ -2081,4 +1394,375 @@ details.guide ol {
   margin-top: 6px;
   padding-top: 10px;
   border-top: 0;
+}
+
+/* ---------- NFC interventions as illustrated scenes ---------- */
+.scene-flow {
+  margin: 16px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #f7f6f2;
+  color: #13203a;
+}
+
+/* phones scroll the picture sideways rather than shrink its labels to nothing */
+.sc-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.sc-stage {
+  position: relative;
+  min-width: 600px;
+}
+
+.sc-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sc-line {
+  stroke: #1f3a68;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sc-line.thin {
+  stroke-width: 1.4;
+}
+
+.sc-sign {
+  fill: #002d72;
+  font: 700 19px var(--font-sans);
+  letter-spacing: 0.06em;
+}
+
+.sc-screen-title {
+  fill: #002d72;
+  font: 700 14px var(--font-sans);
+}
+
+.sc-small {
+  fill: #13203a;
+  font: 500 12.5px var(--font-sans);
+}
+
+.sc-small.strong {
+  font-weight: 700;
+}
+
+.sc-small.muted {
+  fill: #5b6577;
+}
+
+.sc-mid {
+  fill: #13203a;
+  font: 700 16px var(--font-sans);
+}
+
+.sc-hold {
+  fill: rgba(255, 207, 1, 0.06);
+  stroke: rgba(232, 180, 0, 0.45);
+  stroke-width: 2;
+  stroke-dasharray: 8 7;
+  transition: all 500ms var(--ease);
+}
+
+.sc-hold.is-on {
+  fill: rgba(255, 207, 1, 0.16);
+  stroke: #e8b400;
+  stroke-dasharray: none;
+  stroke-width: 3;
+}
+
+.sc-hold-label {
+  fill: #9a7400;
+  font: 700 11.5px var(--font-sans);
+  letter-spacing: 0.12em;
+}
+
+.sc-wire {
+  fill: none;
+  stroke: #8b9dc7;
+  stroke-width: 2;
+  stroke-dasharray: 5 6;
+}
+
+.sc-wire.is-live {
+  stroke: #ffcf01;
+  stroke-width: 3;
+  animation: sc-wire 1.6s ease-out forwards;
+}
+
+@keyframes sc-wire {
+  to {
+    opacity: 0;
+  }
+}
+
+.sc-packet {
+  fill: #ffcf01;
+  stroke: #1f3a68;
+  stroke-width: 2;
+}
+
+.sc-ping path {
+  stroke: #e8b400;
+  stroke-width: 3;
+  stroke-linecap: round;
+  animation: sc-ping 900ms ease-out 2;
+}
+
+.sc-ping.is-bad path {
+  stroke: #c0392b;
+}
+
+@keyframes sc-ping {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.15;
+  }
+}
+
+.sc-move {
+  transition:
+    transform 700ms var(--ease),
+    opacity 600ms var(--ease);
+}
+
+.sc-fade {
+  animation: sc-fade 500ms var(--ease) both;
+}
+
+.sc-hide {
+  opacity: 0;
+}
+
+@keyframes sc-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.sc-row rect {
+  fill: #f0f3f7;
+}
+
+.sc-row.is-new rect {
+  animation: sc-new 1.8s ease-out both;
+}
+
+@keyframes sc-new {
+  from {
+    fill: #ffe680;
+  }
+  to {
+    fill: #fff6cc;
+  }
+}
+
+.sc-spark {
+  fill: #ffcf01;
+  stroke: #1f3a68;
+  stroke-width: 1.5;
+}
+
+.sc-status {
+  transition: fill 400ms var(--ease);
+}
+
+/* info dots over the picture; their cards hold the detail that used to be paragraphs */
+.sc-dot {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #002d72;
+  box-shadow: 0 0 0 0 rgba(0, 45, 114, 0.35);
+  color: #ffcf01;
+  font: italic 700 13px var(--font-serif);
+  translate: -50% -50%;
+  animation: sc-dot 2.4s ease-out infinite;
+}
+
+.sc-dot:hover,
+.sc-dot.is-open {
+  background: #004b8d;
+  animation: none;
+}
+
+@keyframes sc-dot {
+  70% {
+    box-shadow: 0 0 0 9px rgba(0, 45, 114, 0);
+  }
+}
+
+.sc-tip {
+  position: absolute;
+  z-index: 3;
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgba(19, 32, 58, 0.2);
+  color: #13203a;
+  font-size: 12.5px;
+  line-height: 1.45;
+  translate: 16px -10px;
+  pointer-events: none;
+}
+
+.sc-tip.is-left {
+  translate: calc(-100% - 16px) -10px;
+}
+
+.sc-tip.is-up {
+  translate: 16px calc(-100% + 10px);
+}
+
+.sc-tip.is-left.is-up {
+  translate: calc(-100% - 16px) calc(-100% + 10px);
+}
+
+.sc-tip b {
+  display: block;
+  margin-bottom: 2px;
+  color: #002d72;
+}
+
+.sc-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  padding: 12px 16px 14px;
+  border-top: 1px solid rgba(0, 45, 114, 0.1);
+  background: #fff;
+}
+
+.sc-bar .link-button {
+  color: #004b8d;
+}
+
+.sc-steps {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sc-steps li {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d5dce6;
+  transition: background 300ms var(--ease);
+}
+
+.sc-steps li.is-done {
+  background: #e8b400;
+}
+
+.sc-caption {
+  flex: 1 1 260px;
+  margin: 0;
+  color: #13203a;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-dot,
+  .sc-ping path,
+  .sc-row.is-new rect,
+  .sc-fade {
+    animation: none;
+  }
+}
+
+.sc-dim,
+.sc-undim {
+  transition: opacity 500ms var(--ease);
+}
+
+.sc-dim {
+  opacity: 0.3;
+}
+
+/* the workflow map: icon badges in place of the info dots, glowing when they matter at this step */
+.sc-badge {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #002d72;
+  background: #fff;
+  color: #002d72;
+  font: inherit;
+  animation: none;
+}
+
+.sc-badge:hover,
+.sc-badge.is-open {
+  background: #e4ecf5;
+}
+
+.sc-badge.is-active {
+  background: #ffcf01;
+  animation: sc-badge 2s ease-out infinite;
+}
+
+@keyframes sc-badge {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 207, 1, 0.75);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(255, 207, 1, 0);
+  }
+}
+
+.sc-badge-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #002d72;
+  font: 700 10.5px var(--font-sans);
+  white-space: nowrap;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.sc-tip ul {
+  margin: 4px 0 0;
+  padding-left: 16px;
+}
+
+.sc-spin {
+  animation: sc-spin 2.4s linear infinite;
+}
+
+@keyframes sc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-badge.is-active,
+  .sc-spin {
+    animation: none;
+  }
 }

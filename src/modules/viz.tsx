@@ -2,7 +2,7 @@ import { useCallback, useRef, useState, type ReactNode, type PointerEvent as Rea
 
 /**
  * Shared chart chrome (dataviz rules): a titled card, an optional legend, a hover/focus tooltip
- * that never gates a value, and a data-table twin for every chart.
+ * that never gates a value.
  */
 
 export interface TipContent {
@@ -50,14 +50,11 @@ interface ChartCardProps {
   title: string
   headline?: ReactNode
   legend?: ReactNode
-  /** data-table twin: column headers and rows of already-formatted cells */
-  table: { caption: string; columns: string[]; rows: (string | number)[][] }
   note?: string
   children: ReactNode
 }
 
-export function ChartCard({ title, headline, legend, table, note, children }: ChartCardProps) {
-  const [showTable, setShowTable] = useState(false)
+export function ChartCard({ title, headline, legend, note, children }: ChartCardProps) {
   return (
     <figure className="chart-card">
       <figcaption>
@@ -66,33 +63,9 @@ export function ChartCard({ title, headline, legend, table, note, children }: Ch
       </figcaption>
       {legend && <div className="chart-legend">{legend}</div>}
       {children}
-      <div className="chart-foot">
-        {note && <p className="chart-note">{note}</p>}
-        <button type="button" className="link-button" aria-expanded={showTable} onClick={() => setShowTable(!showTable)}>
-          {showTable ? 'Hide data table' : 'Show data table'}
-        </button>
-      </div>
-      {showTable && (
-        <div className="chart-table">
-          <table>
-            <caption>{table.caption}</caption>
-            <thead>
-              <tr>
-                {table.columns.map((c) => (
-                  <th key={c} scope="col">
-                    {c}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {table.rows.map((r, i) => (
-                <tr key={i}>
-                  {r.map((cell, j) => (j === 0 ? <th key={j} scope="row">{cell}</th> : <td key={j}>{cell}</td>))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {note && (
+        <div className="chart-foot">
+          <p className="chart-note">{note}</p>
         </div>
       )}
     </figure>

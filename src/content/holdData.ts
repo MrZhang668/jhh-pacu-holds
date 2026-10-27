@@ -37,21 +37,20 @@ export const HOURLY_HEADLINE = {
   sevenPmRn: 18, // % of "receiving nurse unavailable" holds starting 19:00–19:59
 }
 
-export type ReasonGroup = 'Bed / room' | 'Staffing' | 'Documentation' | 'Clinical / orders' | 'Transport' | 'Other'
 export type Fix = 'NFC tracking' | 'Shift overlap' | 'NFC bed cleaning'
 
 /** PACU hold reasons as a share of all holds, Pareto order, with the fix that targets them. */
-export const REASONS: { label: string; share: number; group: ReasonGroup; fixes: Fix[] }[] = [
-  { label: 'Waiting for a room to be assigned', share: 21.8, group: 'Bed / room', fixes: ['NFC tracking', 'NFC bed cleaning'] },
-  { label: 'Receiving nurse unavailable', share: 21.6, group: 'Staffing', fixes: ['Shift overlap'] },
-  { label: 'Assigned room not clean', share: 13.2, group: 'Bed / room', fixes: ['NFC bed cleaning'] },
-  { label: 'Reason not documented', share: 12.6, group: 'Documentation', fixes: ['NFC tracking'] },
-  { label: 'PACU transport staff unavailable', share: 7.6, group: 'Staffing', fixes: [] },
-  { label: 'No transport out of the hospital', share: 5.7, group: 'Transport', fixes: [] },
-  { label: 'Discharge criteria not met', share: 4.6, group: 'Clinical / orders', fixes: [] },
-  { label: 'Waiting for provider orders', share: 4.4, group: 'Clinical / orders', fixes: [] },
-  { label: 'Waiting for provider', share: 4.0, group: 'Clinical / orders', fixes: [] },
-  { label: 'Other reasons', share: 4.5, group: 'Other', fixes: [] },
+export const REASONS: { label: string; share: number; fixes: Fix[] }[] = [
+  { label: 'Waiting for a room to be assigned', share: 21.8, fixes: ['NFC tracking', 'NFC bed cleaning'] },
+  { label: 'Receiving nurse unavailable', share: 21.6, fixes: ['Shift overlap'] },
+  { label: 'Assigned room not clean', share: 13.2, fixes: ['NFC bed cleaning'] },
+  { label: 'Reason not documented', share: 12.6, fixes: ['NFC tracking'] },
+  { label: 'PACU transport staff unavailable', share: 7.6, fixes: [] },
+  { label: 'No transport out of the hospital', share: 5.7, fixes: [] },
+  { label: 'Discharge criteria not met', share: 4.6, fixes: [] },
+  { label: 'Waiting for provider orders', share: 4.4, fixes: [] },
+  { label: 'Waiting for provider', share: 4.0, fixes: [] },
+  { label: 'Other reasons', share: 4.5, fixes: [] },
 ]
 
 export const TARGETED_SHARE = 69 // waiting for room + nurse unavailable + room not clean + not documented

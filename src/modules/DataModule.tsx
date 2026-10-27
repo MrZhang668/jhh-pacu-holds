@@ -58,11 +58,6 @@ function HourHeatmap() {
           <span>{HEAT_MAX}%+ of that reason’s holds in the hour</span>
         </span>
       }
-      table={{
-        caption: 'Share of each reason’s holds by start hour (%)',
-        columns: ['Start hour', ...HOURLY_REASONS.map((r) => r.label)],
-        rows: hours.map((h) => [hourRange(h), ...HOURLY_REASONS.map((r) => String(r.shares[h]))]),
-      }}
       note="Each row sums to about 100% (whole percents, rounded): it shows when that reason’s holds begin."
     >
       <div className="heatmap" ref={host}>
@@ -112,11 +107,6 @@ function ReasonBars() {
           <LegendKey color="var(--viz-2)" label="Other reasons" />
         </>
       }
-      table={{
-        caption: 'PACU hold reasons, share of all holds',
-        columns: ['Reason', 'Share', 'Cumulative', 'Group', 'Targeted by'],
-        rows: rows.map((r) => [r.label, pct(r.share), pct(r.cumulative, 0), r.group, r.fixes.join(', ') || '—']),
-      }}
     >
       <div className="bars" ref={host}>
         <div className="bar-row bar-axis" aria-hidden="true">
@@ -132,10 +122,7 @@ function ReasonBars() {
         </div>
         {rows.map((r) => (
           <div className="bar-row" key={r.label}>
-            <span className="bar-label">
-              {r.label}
-              <small>{r.group}</small>
-            </span>
+            <span className="bar-label">{r.label}</span>
             <span className="bar-track">
               {[10, 20].map((t) => (
                 <i key={t} className="grid" style={{ left: `${(t / max) * 100}%` }} aria-hidden="true" />
@@ -147,7 +134,7 @@ function ReasonBars() {
                 {...bind({
                   value: pct(r.share),
                   label: r.label,
-                  sub: r.fixes.length ? `Targeted by ${r.fixes.join(' + ')}` : r.group,
+                  sub: r.fixes.length ? `Targeted by ${r.fixes.join(' + ')}` : undefined,
                 })}
               />
               <span className="bar-value">{pct(r.share)}</span>
@@ -190,11 +177,6 @@ function OriginsDestinations() {
     <ChartCard
       title="Where held patients come from and where they go"
       headline="Two operating-room groups produce about 72% of holds, and 82% of held patients are waiting for a regular (non-ICU) inpatient bed."
-      table={{
-        caption: 'Share of PACU holds by origin and by destination',
-        columns: ['Group', 'Share'],
-        rows: [...ORIGINS.map((r) => [`From: ${r.label}`, pct(r.share)]), ...DESTINATIONS.map((r) => [`To: ${r.label}`, pct(r.share)])],
-      }}
       note={SOURCES.tableau}
     >
       <div className="share-grid">

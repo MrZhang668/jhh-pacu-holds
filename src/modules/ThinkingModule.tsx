@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import type React from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { DMAIC_DETAIL, ISSUE_TREE, MATRIX, MATRIX_TAKEAWAY, type TreeNode } from '../content/thinking'
 import { WorkflowScene } from './WorkflowScene'
 
@@ -68,12 +69,60 @@ function matches(node: TreeNode, q: string): boolean {
   return node.label.toLowerCase().includes(q) || (node.children ?? []).some((c) => matches(c, q))
 }
 
-/** Appendix B as a collapsible tree, searchable, and able to jump to a node from the matrix. */
+// mind-map columns as shares of the width: root card, then one column per level
+const MAP_COLS: [number, number][] = [
+  [0, 0.18],
+  [0.205, 0.39],
+  [0.415, 0.655],
+  [0.68, 1],
+]
+const MAP_ROW = 42
+// average glyph width per level, for guessing how a label wraps
+const MAP_CHAR = [8, 7.8, 7, 6.6]
+
+/** Lines a label wraps to in `width` px, greedy by word. */
+function lineCount(text: string, width: number, char: number) {
+  const per = Math.max(8, Math.floor(width / char))
+  let lines = 1
+  let used = 0
+  for (const word of text.split(' ')) {
+    const len = word.length + (used ? 1 : 0)
+    if (used && used + len > per) {
+      lines++
+      used = word.length
+    } else used += len
+  }
+  return lines
+}
+const MAP_PAD = 14
+const MAP_MIN = 600
+
+// every node with children; the map starts fully open, like the team's drawing
+const ALL_BRANCHES: string[] = []
+;(function walk(n: TreeNode) {
+  if (n.children) {
+    ALL_BRANCHES.push(n.id)
+    n.children.forEach(walk)
+  }
+})(ISSUE_TREE)
+
+interface Placed {
+  node: TreeNode
+  depth: number
+  /** which top-level branch it hangs from (colour) */
+  branch: number
+  parent?: Placed
+  y: number
+  /** children hidden while folded */
+  folded: number
+}
+
+/** Appendix B as a mind map: foldable, searchable, and able to jump to a node from the matrix. */
 function IssueTree({ highlight }: { highlight: string | null }) {
   const [query, setQuery] = useState('')
-  const [open, setOpen] = useState<Set<string>>(() => new Set(['root', 'or', 'pacu', 'inpatient', 'hospital']))
+  const [open, setOpen] = useState<Set<string>>(() => new Set(ALL_BRANCHES))
   const q = query.trim().toLowerCase()
-  const found = useRef<HTMLLIElement>(null)
+  const found = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!highlight) return
@@ -102,39 +151,44 @@ function IssueTree({ highlight }: { highlight: string | null }) {
       return next
     })
 
-  const render = (n: TreeNode, depth: number) => {
-    if (q && !matches(n, q)) return null
-    const expanded = q ? true : open.has(n.id)
-    const hit = q && n.label.toLowerCase().includes(q)
-    const isTarget = highlight === n.id
-    return (
-      <li key={n.id} ref={isTarget ? found : undefined} className={`${hit ? 'is-hit' : ''}${isTarget ? ' is-target' : ''}`}>
-        {n.children ? (
-          <button type="button" className={`tree-node depth-${depth}`} aria-expanded={expanded} onClick={() => toggle(n.id)}>
-            <span className="caret" aria-hidden="true">
-              {expanded ? '▾' : '▸'}
-            </span>
-            {n.label}
-          </button>
-        ) : (
-          <span className={`tree-leaf depth-${depth}`}>{n.label}</span>
-        )}
-        {n.children && expanded && <ul>{n.children.map((c) => render(c, depth + 1))}</ul>}
-      </li>
-    )
-  }
-
-  const all = useMemo(() => {
-    const ids: string[] = []
-    const walk = (n: TreeNode) => {
-      if (n.children) {
-        ids.push(n.id)
-        n.children.forEach(walk)
-      }
-    }
-    walk(ISSUE_TREE)
-    return ids
+  // the map is laid out to the panel's width; narrower than MAP_MIN it scrolls sideways
+  const wrap = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(760)
+  useLayoutEffect(() => {
+    const el = wrap.current
+    if (!el) return
+    const fit = () => setWidth(Math.max(MAP_MIN, el.clientWidth))
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [])
+
+  // every shown leaf (or folded node) takes a row; a parent sits halfway between its first and last child
+  const placed: Placed[] = []
+  let cursor = MAP_PAD
+  const place = (n: TreeNode, depth: number, branch: number, parent?: Placed): Placed => {
+    const kids = n.children ?? []
+    const shown = kids.length > 0 && (q ? true : open.has(n.id))
+    const p: Placed = { node: n, depth, branch, parent, y: 0, folded: shown ? 0 : kids.length }
+    placed.push(p)
+    if (shown) {
+      const cs = kids.map((c, i) => place(c, depth + 1, depth === 0 ? i : branch, p))
+      p.y = (cs[0].y + cs[cs.length - 1].y) / 2
+    } else {
+      // a leaf's row grows with the lines its label wraps to
+      const w = (MAP_COLS[depth][1] - MAP_COLS[depth][0]) * width - 10
+      const h = Math.max(MAP_ROW, lineCount(n.label + (p.folded ? ' +0' : ''), w, MAP_CHAR[depth]) * 17 + 22)
+      p.y = cursor + h / 2
+      cursor += h
+    }
+    return p
+  }
+  place(ISSUE_TREE, 0, -1)
+  const height = cursor + MAP_PAD
+  const x0 = (d: number) => MAP_COLS[d][0] * width
+  const x1 = (d: number) => MAP_COLS[d][1] * width
+
 
   return (
     <section>
@@ -144,14 +198,67 @@ function IssueTree({ highlight }: { highlight: string | null }) {
       </p>
       <div className="tree-tools">
         <input type="search" placeholder="Search the tree…" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search the issue tree" />
-        <button type="button" className="link-button" onClick={() => setOpen(new Set(all))}>
+        <button type="button" className="link-button" onClick={() => setOpen(new Set(ALL_BRANCHES))}>
           Expand all
         </button>
         <button type="button" className="link-button" onClick={() => setOpen(new Set(['root']))}>
           Collapse all
         </button>
       </div>
-      <ul className="tree">{render(ISSUE_TREE, 0)}</ul>
+      <div className="mindmap-scroll" ref={wrap}>
+        <div className="mindmap" style={{ width, height }}>
+          <svg width={width} height={height} aria-hidden="true">
+            {placed.map((p) => {
+              if (p.depth === 0) return null
+              const sx = x1(p.depth - 1)
+              const ex = x0(p.depth)
+              const mx = (sx + ex) / 2
+              const py = p.parent!.y
+              return (
+                <path
+                  key={p.node.id}
+                  className={`mm-edge b${p.branch} d${p.depth}${q && !matches(p.node, q) ? ' is-dim' : ''}`}
+                  d={`M${sx} ${py}C${mx} ${py} ${mx} ${p.y} ${ex} ${p.y}H${x1(p.depth)}`}
+                />
+              )
+            })}
+          </svg>
+          {placed.map((p) => {
+            const hit = q && p.node.label.toLowerCase().includes(q)
+            const isTarget = highlight === p.node.id
+            const cls = `mm-node d${p.depth}${p.depth > 0 ? ` b${p.branch}` : ''}${hit ? ' is-hit' : ''}${isTarget ? ' is-target' : ''}${
+              q && !matches(p.node, q) ? ' is-dim' : ''
+            }`
+            const style =
+              p.depth === 0
+                ? { left: 0, top: p.y, width: x1(0) }
+                : { left: x0(p.depth), top: p.y, width: x1(p.depth) - x0(p.depth) - 6 }
+            const body = (
+              <>
+                {p.node.label}
+                {p.folded > 0 && <span className="mm-more">+{p.folded}</span>}
+              </>
+            )
+            return p.node.children && p.depth > 0 ? (
+              <button
+                key={p.node.id}
+                ref={isTarget ? (found as React.RefObject<HTMLButtonElement>) : undefined}
+                type="button"
+                className={cls}
+                style={style}
+                aria-expanded={!p.folded}
+                onClick={() => toggle(p.node.id)}
+              >
+                {body}
+              </button>
+            ) : (
+              <div key={p.node.id} ref={isTarget ? (found as React.RefObject<HTMLDivElement>) : undefined} className={cls} style={style}>
+                {body}
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </section>
   )
 }

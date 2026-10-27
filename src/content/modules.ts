@@ -11,7 +11,7 @@ export interface ModuleInfo {
   /** one line shown when hovering the label */
   teaser: string
   /** one-sentence conclusion at the top of the panel */
-  lede: string
+  lede?: string
   facts: { value: string; label: string }[]
   /** camera framing when the module opens: degrees and metres around the building anchor */
   camera: { azimuth: number; polar: number; distance: number; targetY: number }
@@ -60,7 +60,6 @@ export const MODULES: Record<ModuleKey, ModuleInfo> = {
     title: 'Problem Definition & Root Causes',
     building: 'welch',
     teaser: 'How we framed and ranked the problem',
-    lede: 'Mapping the flow end to end showed delays cascading from the OR to the PACU to the inpatient units.',
     facts: [],
     camera: { azimuth: -24, polar: 55, distance: 260, targetY: 8 },
   },

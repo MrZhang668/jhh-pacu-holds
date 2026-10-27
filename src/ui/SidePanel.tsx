@@ -39,7 +39,7 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
     title = m.title
     body = (
       <>
-        <p className="lede">{m.lede}</p>
+        {m.lede && <p className="lede">{m.lede}</p>}
         {m.facts.length > 0 && (
           <ul className="facts">
             {m.facts.map((f) => (

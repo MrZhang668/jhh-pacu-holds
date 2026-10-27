@@ -3,20 +3,26 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { DMAIC_DETAIL, ISSUE_TREE, MATRIX, MATRIX_TAKEAWAY, type TreeNode } from '../content/thinking'
 import { WorkflowScene } from './WorkflowScene'
 
-type Tab = 'flow' | 'tree' | 'matrix' | 'dmaic'
+type Tab = 'flow' | 'tree' | 'matrix'
 const TABS: { key: Tab; label: string }[] = [
   { key: 'flow', label: 'Workflow map' },
   { key: 'tree', label: 'Issue tree' },
   { key: 'matrix', label: 'Impact matrix' },
-  { key: 'dmaic', label: 'DMAIC' },
 ]
 
 export default function ThinkingModule() {
   const [tab, setTab] = useState<Tab>('flow')
   const [highlight, setHighlight] = useState<string | null>(null)
+  const tabs = useRef<HTMLDivElement>(null)
   return (
     <>
-      <div className="tabs" role="tablist" aria-label="Thinking tools">
+      <DmaicFlow
+        onOpen={(t) => {
+          setTab(t)
+          tabs.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        }}
+      />
+      <div ref={tabs} className="tabs" role="tablist" aria-label="Thinking tools">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -42,7 +48,6 @@ export default function ThinkingModule() {
             }}
           />
         )}
-        {tab === 'dmaic' && <Dmaic />}
       </div>
     </>
   )
@@ -352,19 +357,63 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
   )
 }
 
-function Dmaic() {
+// where each step's work lives on the site: a tab below, or the outcomes module
+const DMAIC_LINKS: ({ tab: Tab; label: string } | { href: string; label: string })[] = [
+  { tab: 'flow', label: 'Open the workflow map' },
+  { tab: 'tree', label: 'Open the issue tree' },
+  { tab: 'matrix', label: 'Open the impact matrix' },
+  { href: '#/outcomes', label: 'See the three interventions' },
+  { href: '#/outcomes', label: 'See the roll-out plan' },
+]
+
+/** The five DMAIC steps as one interlocking arrow; a step's detail opens beneath it on hover or tap. */
+function DmaicFlow({ onOpen }: { onOpen: (t: Tab) => void }) {
+  const [on, setOn] = useState<number | null>(null)
+  const d = on === null ? null : DMAIC_DETAIL[on]
+  const link = on === null ? null : DMAIC_LINKS[on]
   return (
-    <section>
-      <ol className="dmaic-steps">
-        {DMAIC_DETAIL.map((d, i) => (
-          <li key={d.step}>
-            <span className="num">{i + 1}</span>
-            <b>{d.step}</b>
-            <span className="tools">{d.tools}</span>
-            <p>{d.text}</p>
+    <section className="dmaic-flow" aria-label="How we worked: DMAIC" onMouseLeave={() => setOn(null)}>
+      <p className="dm-eyebrow">How we worked · DMAIC</p>
+      <ol className="dm-chain">
+        {DMAIC_DETAIL.map((s, i) => (
+          <li key={s.step} className={`dm-step s${i}${on === i ? ' is-on' : ''}${on !== null && on !== i ? ' is-off' : ''}`}>
+            <button
+              type="button"
+              aria-expanded={on === i}
+              aria-controls="dm-detail"
+              onMouseEnter={() => setOn(i)}
+              onFocus={() => setOn(i)}
+              onClick={() => setOn(on === i ? null : i)}
+            >
+              <span className="dm-letter" aria-hidden="true">
+                {s.step[0]}
+              </span>
+              <span className="dm-name">{s.step}</span>
+            </button>
           </li>
         ))}
       </ol>
+      <div id="dm-detail" className={`dm-detail${d ? ' is-open' : ''}`} style={{ '--at': `${(on ?? 0) * 20 + 10}%` } as React.CSSProperties}>
+        <div className="dm-clip">
+          {d && link && (
+            <div className="dm-card" key={d.step}>
+              <b className="dm-title">{d.step}</b>
+              <span className="dm-tools">{d.tools}</span>
+              <p>{d.text}</p>
+              {'tab' in link ? (
+                <button type="button" className="link-button" onClick={() => onOpen(link.tab)}>
+                  {link.label} ↓
+                </button>
+              ) : (
+                <a className="link-button" href={link.href}>
+                  {link.label} →
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      {!d && <p className="dm-hint">Hover or tap a step to see what we did.</p>}
     </section>
   )
 }

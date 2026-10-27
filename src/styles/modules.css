@@ -1069,40 +1069,191 @@ button.mm-node:hover {
   font-weight: 700;
 }
 
-.dmaic-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+/* DMAIC: five chevrons locked into one arrow, darkest Hopkins blue to gold */
+.dmaic-flow {
+  --dm-0: #002d72;
+  --dm-1: #0b4289;
+  --dm-2: #23599f;
+  --dm-3: #4a7fbe;
+  margin: 4px 0 22px;
+  container-type: inline-size;
+}
+
+:root[data-theme='night'] .dmaic-flow {
+  --dm-0: #1d4a93;
+  --dm-1: #2a5ea8;
+  --dm-2: #3b74bd;
+  --dm-3: #5b93d2;
+}
+
+.dm-eyebrow {
+  margin: 0 0 8px !important;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dm-chain {
+  display: flex;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.dmaic-steps li {
+.dm-step {
+  flex: 1;
+  min-width: 0;
+  /* each chevron's point sits in the next one's notch */
+  margin-left: -9px;
+  filter: drop-shadow(0 2px 3px rgba(19, 32, 58, 0.18));
+  transition:
+    transform 250ms var(--ease),
+    opacity 250ms var(--ease);
+}
+
+.dm-step:first-child {
+  margin-left: 0;
+}
+
+.dm-step button {
   display: flex;
+  width: 100%;
+  height: 64px;
   flex-direction: column;
-  gap: 4px;
-  padding: 14px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 14px 0 22px;
+  border: 0;
+  background: var(--dm-c);
+  color: #fff;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+  cursor: pointer;
+}
+
+.dm-step:first-child button {
+  padding-left: 8px;
+  border-radius: 10px 0 0 10px;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+}
+
+.dm-step.s0 { --dm-c: var(--dm-0); }
+.dm-step.s1 { --dm-c: var(--dm-1); }
+.dm-step.s2 { --dm-c: var(--dm-2); }
+.dm-step.s3 { --dm-c: var(--dm-3); }
+.dm-step.s4 { --dm-c: var(--gold); }
+
+.dm-step.s4 button {
+  color: #13203a;
+}
+
+.dm-step.is-on {
+  transform: translateY(-4px);
+}
+
+.dm-step.is-off {
+  opacity: 0.55;
+}
+
+.dm-letter {
+  font: 700 26px/1 var(--font-serif);
+}
+
+.dm-name {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* the detail opens under the chain, its pointer under the step */
+.dm-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms var(--ease);
+}
+
+.dm-detail.is-open {
+  grid-template-rows: 1fr;
+}
+
+.dm-clip {
+  overflow: hidden;
+}
+
+.dm-detail.is-open .dm-clip {
+  overflow: visible;
+}
+
+.dm-card {
+  position: relative;
+  margin-top: 12px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--card);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  animation: sc-fade 300ms var(--ease) both;
 }
 
-.dmaic-steps b {
+.dm-card::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: var(--at);
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  transform: translateX(-50%) rotate(45deg);
+  transition: left 250ms var(--ease);
+}
+
+.dm-title {
+  display: block;
   color: var(--title);
-  font-family: var(--font-serif);
-  font-size: 18px;
+  font: 700 16px var(--font-serif);
 }
 
-.dmaic-steps .tools {
+/* too narrow for the names: the letters carry the chain and the card names the step */
+@container (max-width: 440px) {
+  .dm-name {
+    display: none;
+  }
+}
+
+.dm-tools {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dm-card p {
+  margin: 4px 0 6px !important;
+  font-size: 13.5px;
+  line-height: 1.5 !important;
+}
+
+.dm-hint {
+  margin: 8px 0 0 !important;
   color: var(--muted);
   font-size: 12px;
 }
 
-.dmaic-steps p {
-  margin: 4px 0 0 !important;
-  font-size: 13.5px;
-  line-height: 1.5 !important;
+@media (prefers-reduced-motion: reduce) {
+  .dm-step,
+  .dm-detail,
+  .dm-card {
+    transition: none;
+    animation: none;
+  }
 }
 
 /* ---------- outcomes ---------- */

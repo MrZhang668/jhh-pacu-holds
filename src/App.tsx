@@ -189,9 +189,11 @@ export default function App() {
         />
       )}
 
-      <Header route={route} />
+      <div className="top-left">
+        <Header />
+        {webgl && <TimeControls />}
+      </div>
       {!panelOpen && <OverviewPanel collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />}
-      {webgl && <TimeControls />}
       {webgl && (
         <MapControls
           compass={compass}
@@ -217,7 +219,7 @@ export default function App() {
         Independent student project (JHU MSEM Team 6) · Not an official Johns Hopkins Medicine website · Map data ©
         OpenStreetMap contributors
       </footer>
-      {campus && <SidePanel route={route} campus={campus} onClose={closePanel} />}
+      {campus && <SidePanel route={route} onClose={closePanel} />}
       {CAPTURE === 'og' && (
         <div className="og-card">
           <p className="og-eyebrow">JHU MSEM · Team 6 · Fall 2025</p>

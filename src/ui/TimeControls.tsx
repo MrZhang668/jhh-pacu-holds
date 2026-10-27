@@ -39,6 +39,14 @@ export function TimeControls() {
         </button>
       </div>
       <div className="scrub">
+        <p className="spark-head">
+          <span>PACU holds by hour</span>
+          {/* the gold swatch ties the clock to the gold bar for the selected hour */}
+          <output>
+            <i aria-hidden="true" />
+            {formatHour(hours)}
+          </output>
+        </p>
         <button
           type="button"
           className="play"
@@ -47,31 +55,46 @@ export function TimeControls() {
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
         </button>
-        <div className="track">
-          <HoldSparkline hours={hours} />
-          <input
-            type="range"
-            min={0}
-            max={23.95}
-            step={0.05}
-            value={hours}
-            onChange={(e) => jump(Number(e.target.value))}
-            aria-label="Time of day"
-            aria-valuetext={formatHour(hours)}
-          />
+        <HoldSparkline hours={hours} />
+        <input
+          type="range"
+          min={0}
+          max={23.95}
+          step={0.05}
+          value={hours}
+          onChange={(e) => jump(Number(e.target.value))}
+          aria-label="Time of day"
+          aria-valuetext={formatHour(hours)}
+        />
+        <div className="spark-ticks" aria-hidden="true">
+          {TICKS.map((t) => (
+            <span key={t.h} style={{ left: `${(t.h / 24) * 100}%` }}>
+              {t.label}
+            </span>
+          ))}
         </div>
-        <output>{formatHour(hours)}</output>
       </div>
       <p className="time-note" aria-live="polite">
         {inShiftChange(hours) ? (
-          <strong>7 PM shift change: holds spike as inpatient nurses hand off.</strong>
+          <strong>7 PM shift change: transfers stall while inpatient nurses hand off, so holds spike.</strong>
         ) : (
-          <>Gold floors show PACU holds this hour (Zayed 3 · Zayed 5 · Weinberg 3), relative to the busiest hour.</>
+          <>
+            Bars: holds starting each hour, relative to the 7 PM peak. On Zayed and Weinberg, gold beads ring the PACU
+            floors as holds build and blue dots are patients moving up to the wards.
+          </>
         )}
       </p>
     </section>
   )
 }
+
+// hour marks under the slider, at the start of each six-hour block
+const TICKS = [
+  { h: 0, label: '12 AM' },
+  { h: 6, label: '6 AM' },
+  { h: 12, label: '12 PM' },
+  { h: 18, label: '6 PM' },
+]
 
 const W = 216
 const H = 28

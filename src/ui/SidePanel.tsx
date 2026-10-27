@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
 import { MODULE_ORDER, MODULES } from '../content/modules'
 import { DMAIC, OVERVIEW, OVERVIEW_FOOTNOTE, PROJECT, TIMELINE } from '../content/overview'
 import { INTERVIEWS, PUBLISHED } from '../content/references'
-import type { Campus, ModuleKey } from '../data/campus'
+import type { ModuleKey } from '../data/campus'
 import { navigate, type Route } from '../router'
 import { CloseIcon } from './icons'
 
@@ -15,7 +15,7 @@ const MODULE_BODIES: Record<ModuleKey, ReturnType<typeof lazy>> = {
 }
 
 /** The right-hand panel that opens over the map for a module, the full overview or About. */
-export function SidePanel({ route, campus, onClose }: { route: Route; campus: Campus; onClose: () => void }) {
+export function SidePanel({ route, onClose }: { route: Route; onClose: () => void }) {
   const heading = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     heading.current?.focus({ preventScroll: true })
@@ -31,7 +31,6 @@ export function SidePanel({ route, campus, onClose }: { route: Route; campus: Ca
 
   if (route.name === 'module') {
     const m = MODULES[route.key]
-    const building = campus.buildings.find((b) => b.key === m.building)
     const i = MODULE_ORDER.indexOf(route.key)
     const prev = MODULE_ORDER[i - 1]
     const next = MODULE_ORDER[i + 1]
@@ -42,7 +41,6 @@ export function SidePanel({ route, campus, onClose }: { route: Route; campus: Ca
       </>
     )
     title = m.title
-    sub = building ? `At the ${building.name}` : undefined
     body = (
       <>
         <p className="lede">{m.lede}</p>

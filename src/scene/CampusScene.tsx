@@ -9,6 +9,7 @@ import { Ambient } from './Ambient'
 import { Buildings } from './Buildings'
 import { CameraDirector, FOG, openingPosition } from './CameraDirector'
 import { Ground } from './Ground'
+import { HoldFlow } from './HoldFlow'
 import { LabelProjector } from './LabelProjector'
 import type { LabelSpec } from './labels'
 import { PacuBands } from './PacuBands'
@@ -82,6 +83,7 @@ export default function CampusScene(p: Props) {
         onOpenModule={p.onOpenModule}
       />
       <PacuBands campus={p.campus} />
+      <HoldFlow campus={p.campus} running={p.ambientRunning} />
       <Ambient campus={p.campus} enabled={p.ambient} running={p.ambientRunning} />
       <LabelProjector specs={p.labels} els={p.labelEls} />
       <CameraDirector

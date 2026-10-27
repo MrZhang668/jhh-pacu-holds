@@ -31,3 +31,9 @@ export const PACU_FLOORS = [
 
 /** Storey height used to place those floors (m): Zayed is 56 m over 12 levels. */
 export const FLOOR_HEIGHT: Record<string, number> = { zayed: 4.67, weinberg: 4.5 }
+
+/**
+ * Inpatient floors the transfer dots rise to: Zayed 9–11, and Weinberg from 4CD (the next floor up)
+ * to 7, stretched so the motion still reads from the opening view.
+ */
+export const WARD_FLOORS: Record<string, [number, number]> = { zayed: [9, 11], weinberg: [4, 7] }

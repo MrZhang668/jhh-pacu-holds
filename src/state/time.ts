@@ -11,7 +11,7 @@ let playing = false
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((l) => l())
 
-export const DAY_SECONDS = 20 // one full day of playback
+export const DAY_SECONDS = 60 // one full day of playback
 
 export const timeStore = {
   get: () => hours,

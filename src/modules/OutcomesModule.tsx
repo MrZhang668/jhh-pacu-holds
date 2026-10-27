@@ -74,10 +74,7 @@ function CauseFixGrid() {
           <tbody>
             {ROOT_CAUSES.map((c) => (
               <tr key={c.key}>
-                <th scope="row">
-                  <b>{c.title}</b>
-                  <span>{c.text}</span>
-                </th>
+                <th scope="row">{c.text}</th>
                 {SOLUTIONS.map((s) => (
                   <td key={s.key}>
                     {c.fixes.includes(s.key) ? (

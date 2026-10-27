@@ -3,20 +3,17 @@
 export const ROOT_CAUSES = [
   {
     key: 'handoff',
-    title: 'Conflicting duties at shift change',
-    text: 'Patients posted to arrive between 6:45 and 7:15 PM land in the middle of report.',
+    text: 'Conflicting duties at shift change, as patients posted to arrive between 6:45 and 7:15 PM land in the middle of report',
     fixes: ['overlap'],
   },
   {
     key: 'standard',
-    title: 'No shared standard',
-    text: 'Communication and practice follow personal experience and unit culture.',
+    text: 'No shared standard, so communication and practice follow personal experience and unit culture',
     fixes: ['tracking', 'cleaning'],
   },
   {
     key: 'visibility',
-    title: 'No cross-department visibility',
-    text: 'Status depends on manual entries in Epic and Secure Chat, so patients and rooms go “invisible”.',
+    text: 'No cross-department visibility, as status depends on manual entries in Epic and Secure Chat and patients and rooms go “invisible”',
     fixes: ['tracking', 'cleaning'],
   },
 ]

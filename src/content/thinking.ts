@@ -149,37 +149,35 @@ export const ISSUE_TREE: TreeNode = {
 
 /**
  * Impact matrix (Appendix C): issues placed by effort (x, 0 = low) and impact (y, 0 = low), read
- * off the two rounds the team drew. `node` links a point to the issue-tree branch it came from.
+ * off the team's revised drawing. `node` links a point to the issue-tree branch it came from.
  */
 export interface MatrixItem {
   key: string
   label: string
   node: string
-  r1?: [number, number]
-  r2?: [number, number]
+  pos: [number, number]
 }
 
 export const MATRIX: MatrixItem[] = [
-  { key: 'message', label: 'No timely message from other departments', node: 'pacu-message', r1: [0.13, 0.85], r2: [0.4, 0.91] },
-  { key: 'readiness', label: 'Patient readiness', node: 'pacu-readiness', r1: [0.28, 0.7], r2: [0.11, 0.87] },
-  { key: 'open-beds', label: 'Open beds but no management', node: 'in-beds', r1: [0.38, 0.56], r2: [0.22, 0.55] },
-  { key: 'goals', label: 'Units prioritize their own goals', node: 'or-comm', r1: [0.58, 0.61], r2: [0.22, 0.74] },
-  { key: 'acuity', label: 'Nurse acuity', node: 'pacu-workload', r1: [0.58, 0.78], r2: [0.73, 0.84] },
-  { key: 'staffing', label: 'Staff scheduling', node: 'pacu-staff', r1: [0.73, 0.91], r2: [0.73, 0.91] },
-  { key: 'surgery', label: 'Surgery scheduling', node: 'or-scheduling', r1: [0.9, 0.91], r2: [0.9, 0.91] },
-  { key: 'turnover', label: 'Turnover of beds', node: 'pacu-clean', r1: [0.73, 0.84] },
-  { key: 'capacity', label: 'Capacity', node: 'pacu-capacity', r1: [0.9, 0.68], r2: [0.9, 0.68] },
-  { key: 'policy', label: 'Policy (incl. medication)', node: 'h-policy', r1: [0.9, 0.42], r2: [0.9, 0.48] },
-  { key: 'bed-availability', label: 'Availability of beds', node: 'pacu-capacity', r2: [0.9, 0.39] },
-  { key: 'equipment', label: 'Availability of equipment', node: 'pacu-equipment', r1: [0.9, 0.28], r2: [0.9, 0.33] },
-  { key: 'transport', label: 'Transportation', node: 'h-transport', r1: [0.38, 0.28], r2: [0.38, 0.27] },
-  { key: 'family', label: 'Family', node: 'in-family', r1: [0.38, 0.18], r2: [0.16, 0.27] },
-  { key: 'stay', label: 'Extended stay', node: 'pacu-stay', r1: [0.56, 0.18], r2: [0.56, 0.2] },
-  { key: 'temp', label: 'Temporary nurses', node: 'h-temp', r1: [0.76, 0.18], r2: [0.73, 0.2] },
+  { key: 'message', label: 'No timely message from other departments', node: 'pacu-message', pos: [0.4, 0.91] },
+  { key: 'readiness', label: 'Patient readiness', node: 'pacu-readiness', pos: [0.11, 0.87] },
+  { key: 'open-beds', label: 'Open beds but no management', node: 'in-beds', pos: [0.22, 0.55] },
+  { key: 'goals', label: 'Units prioritize their own goals', node: 'or-comm', pos: [0.22, 0.74] },
+  { key: 'acuity', label: 'Nurse acuity', node: 'pacu-workload', pos: [0.73, 0.84] },
+  { key: 'staffing', label: 'Staff scheduling', node: 'pacu-staff', pos: [0.73, 0.91] },
+  { key: 'surgery', label: 'Surgery scheduling', node: 'or-scheduling', pos: [0.9, 0.91] },
+  { key: 'capacity', label: 'Capacity', node: 'pacu-capacity', pos: [0.9, 0.68] },
+  { key: 'policy', label: 'Policy (incl. medication)', node: 'h-policy', pos: [0.9, 0.48] },
+  { key: 'bed-availability', label: 'Availability of beds', node: 'pacu-capacity', pos: [0.9, 0.39] },
+  { key: 'equipment', label: 'Availability of equipment', node: 'pacu-equipment', pos: [0.9, 0.33] },
+  { key: 'transport', label: 'Transportation', node: 'h-transport', pos: [0.38, 0.27] },
+  { key: 'family', label: 'Family', node: 'in-family', pos: [0.16, 0.27] },
+  { key: 'stay', label: 'Extended stay', node: 'pacu-stay', pos: [0.56, 0.2] },
+  { key: 'temp', label: 'Temporary nurses', node: 'h-temp', pos: [0.73, 0.2] },
 ]
 
 export const MATRIX_TAKEAWAY =
-  'The second round re-framed issues as root causes. Communication between units and patient readiness moved into the high-impact, low-effort corner — which is where our interventions aim.'
+  'Framed as root causes, communication between units and patient readiness sit in the high-impact, low-effort corner — which is where our interventions aim.'
 
 export const DMAIC_DETAIL = [
   {

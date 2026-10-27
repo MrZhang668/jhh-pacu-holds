@@ -937,25 +937,6 @@ button.mm-node:hover {
   50% { background: rgba(255, 207, 1, 0.35); }
 }
 
-.matrix-head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 20px;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.matrix-head p {
-  flex: 1;
-  min-width: 260px;
-  margin: 0 !important;
-}
-
-.seg-small button {
-  padding: 5px 12px;
-  font-size: 12.5px;
-}
-
 .matrix {
   container-type: inline-size;
   display: grid;
@@ -1152,28 +1133,6 @@ button.mm-node:hover {
   opacity: 0.15;
 }
 
-.mx-trail {
-  transition: opacity 300ms var(--ease);
-}
-
-.mx-trail line {
-  stroke: var(--c);
-  stroke-width: 1.5;
-  stroke-dasharray: 3 4;
-  opacity: 0.7;
-}
-
-.mx-trail circle {
-  fill: none;
-  stroke: var(--c);
-  stroke-width: 1.5;
-  opacity: 0.7;
-}
-
-.mx-trail.is-off {
-  opacity: 0.1;
-}
-
 .mx-tag text {
   fill: var(--ink);
   font-size: 12.5px;
@@ -1272,24 +1231,7 @@ button.mm-node:hover {
   color: #13203a;
 }
 
-.mx-moved {
-  display: block;
-  color: var(--muted);
-  font-size: 11px;
-  font-style: normal;
-}
-
-.mx-moved::before {
-  content: '↗ ';
-}
-
 .mx-empty {
-  margin: 0 !important;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.mx-dropped {
   margin: 0 !important;
   color: var(--muted);
   font-size: 12px;

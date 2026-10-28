@@ -144,8 +144,8 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
           <h3>{t('About this site', '关于本网站')}</h3>
           <p>
             {t(
-              'An independent student project (JHU MSEM), not an official Johns Hopkins Medicine website. Hold data are derived and normalized from 90 days of internal operational data; they are not official JHH statistics.',
-              '本网站为独立学生项目（JHU MSEM），并非约翰斯·霍普金斯医学官方网站。滞留数据由 90 天的内部运营数据推导并归一化处理而来，不代表约翰斯·霍普金斯医院的官方统计。',
+              'An independent student project (JHU MSEM), not an official Johns Hopkins Medicine website. The hold data shown are illustrative: they keep the patterns found in the analysis, but the values have been adjusted and are not real operational data.',
+              '本网站为独立学生项目（JHU MSEM），并非约翰斯·霍普金斯医学官方网站。网站展示的滞留数据为虚拟数据：保留了分析中发现的规律，但具体数值已作调整，并非真实运营数据。',
             )}
           </p>
           <p>

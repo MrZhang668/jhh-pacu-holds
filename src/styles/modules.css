@@ -103,13 +103,12 @@
 }
 
 /* ---------- chart chrome ---------- */
+/* small print at the foot of the Data page */
 .data-note {
-  margin: 24px 0 0 !important;
-  padding: 10px 14px;
-  border-left: 3px solid var(--viz-accent);
-  border-radius: 0 8px 8px 0;
-  background: var(--card);
-  font-size: 13px;
+  margin: 20px 0 0 !important;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .chart-card {

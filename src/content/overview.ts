@@ -97,10 +97,10 @@ export const OVERVIEW_FOOTNOTE =
 
 /** Shown under the three columns on the homepage. */
 export const ACKNOWLEDGEMENT =
-  'We thank Dr. Sharon Owens and Amy Hampt of JHH Nursing for hosting this project, and the nurses, managers and bed managers who shared their time. This is an independent student project from the JHU MSEM program, not an official Johns Hopkins Medicine publication; all hold figures are derived and normalized.'
+  'We thank Dr. Sharon Owens and Amy Hampt of JHH Nursing for hosting this project, and the nurses, managers and bed managers who shared their time. This is an independent student project from the JHU MSEM program, not an official Johns Hopkins Medicine publication; the hold data shown are illustrative, not real operational data.'
 
 export const ACKNOWLEDGEMENT_ZH =
-  '感谢约翰斯·霍普金斯医院护理部 Sharon Owens 博士与 Amy Hampt 对本项目的指导与支持，也感谢所有抽出宝贵时间的护士、护士长及床位管理人员。本网站为约翰斯·霍普金斯大学 MSEM 项目的独立学生作品，并非约翰斯·霍普金斯医学（Johns Hopkins Medicine）官方发布内容；文中所有滞留数据均经过推导与归一化处理。'
+  '感谢约翰斯·霍普金斯医院护理部 Sharon Owens 博士与 Amy Hampt 对本项目的指导与支持，也感谢所有抽出宝贵时间的护士、护士长及床位管理人员。本网站为约翰斯·霍普金斯大学 MSEM 项目的独立学生作品，并非约翰斯·霍普金斯医学（Johns Hopkins Medicine）官方发布内容；文中展示的滞留数据为虚拟数据，并非真实运营数据。'
 
 export const DMAIC = [
   { step: 'Define', text: 'Scoped the OR → PACU → inpatient flow across Zayed and Weinberg with our hosts, and drew a workflow mind map of people, systems and hand-offs.' },

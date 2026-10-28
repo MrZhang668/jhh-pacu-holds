@@ -19,7 +19,7 @@ import { ChartCard, pct, rampColor, useTooltip } from './viz'
 // One-hue sequential ramps (light → Hopkins Blue; on the night surface, dark → light)
 const DAY_RAMP = ['#eef3f9', '#c9dcf1', '#93bfe8', '#5293d3', '#2263a8', '#002d72']
 const NIGHT_RAMP = ['#17243d', '#1f3a62', '#2c5e95', '#4b8dcd', '#8cc1ef', '#d3eafc']
-const HEAT_MAX = 18
+const HEAT_MAX = 17
 
 const hourRange = (h: number) => `${String(h).padStart(2, '0')}:00–${String(h).padStart(2, '0')}:59`
 
@@ -27,11 +27,11 @@ export default function DataModule() {
   const t = useT()
   return (
     <>
-      <p className="data-note">{t(DATA_NOTE, DATA_NOTE_ZH)}</p>
       <HourHeatmap />
       <RoutedReasons />
       <OriginsDestinations />
       <ThresholdTile />
+      <p className="data-note">{t(DATA_NOTE, DATA_NOTE_ZH)}</p>
     </>
   )
 }
@@ -138,8 +138,8 @@ function OriginsDestinations() {
     <ChartCard
       title={t('Where held patients come from and where they go', '滞留患者从何而来、去往何处')}
       headline={t(
-        'Two operating-room groups produce about 72% of holds, and 82% of held patients are waiting for a regular (non-ICU) inpatient bed.',
-        '两组手术室产生了约 72% 的滞留；82% 的滞留患者在等待普通（非 ICU）住院床位。',
+        'Two operating-room groups produce about 71% of holds, and 81% of held patients are waiting for a regular (non-ICU) inpatient bed.',
+        '两组手术室产生了约 71% 的滞留；81% 的滞留患者在等待普通（非 ICU）住院床位。',
       )}
     >
       <div className="share-grid">

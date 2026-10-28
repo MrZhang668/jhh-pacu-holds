@@ -6,10 +6,10 @@ import type { Solution } from './outcomes'
 
 /** Small print at the foot of the Data page. */
 export const DATA_NOTE =
-  'The figures on this page are illustrative, not real operational data. They keep the patterns the project found, but the values have been adjusted.'
+  'The figures on this page are illustrative, not real operational data.'
 
 export const DATA_NOTE_ZH =
-  '本页面展示的是虚拟数据，并非真实运营数据。数据保留了项目分析中发现的规律，但具体数值已作调整。'
+  '本页面展示的是虚拟数据，并非真实运营数据。'
 
 /** Share of each reason's holds by start hour, whole percents (each row sums to ~100%). Kept at whole
  *  percents on purpose: one decimal is finer than a single hold, so the counts could be read back. */

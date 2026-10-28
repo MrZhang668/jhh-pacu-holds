@@ -1,16 +1,10 @@
 // Derived, normalized hold data for the Data module. Only percentages and ratios live here — no
 // counts or records (the source data are internal JHH operational data and are not part of this repository).
 
+import type { Solution } from './outcomes'
+
 export const DATA_NOTE =
   'Derived from 90 days of JHM operational data (Jun–Sep 2025); values normalized and rounded; not official JHH statistics.'
-
-export const SOURCES = {
-  hourly:
-    'Hour of day: the three most common hold reasons, from the hour × reason table in the team’s October 2 presentation (90-day extract).',
-  tableau:
-    'Reasons, sites and destinations: JHM Perioperative Operations PACU-holds dashboard, surgery dates Jun 13 – Sep 10, 2025.',
-  scope: 'The two extracts were built differently, so their percentages are shown side by side, never combined.',
-}
 
 /** Share of each reason's holds by start hour, whole percents (each row sums to ~100%). Kept at whole
  *  percents on purpose: one decimal is finer than a single hold, so the counts could be read back. */
@@ -37,14 +31,37 @@ export const HOURLY_HEADLINE = {
   sevenPmRn: 18, // % of "receiving nurse unavailable" holds starting 19:00–19:59
 }
 
-export type Fix = 'NFC tracking' | 'Shift overlap' | 'NFC bed cleaning'
+export type FixKey = Solution['key']
 
-/** PACU hold reasons as a share of all holds, Pareto order, with the fix that targets them. */
-export const REASONS: { label: string; share: number; fixes: Fix[] }[] = [
-  { label: 'Waiting for a room to be assigned', share: 21.8, fixes: ['NFC tracking', 'NFC bed cleaning'] },
-  { label: 'Receiving nurse unavailable', share: 21.6, fixes: ['Shift overlap'] },
-  { label: 'Assigned room not clean', share: 13.2, fixes: ['NFC bed cleaning'] },
-  { label: 'Reason not documented', share: 12.6, fixes: ['NFC tracking'] },
+/**
+ * PACU hold reasons as a share of all holds, Pareto order, with the interventions that target them and
+ * one line on how (wording from the interventions in the final report).
+ */
+export const REASONS: { label: string; share: number; fixes: FixKey[]; why?: string }[] = [
+  {
+    label: 'Waiting for a room to be assigned',
+    share: 21.8,
+    fixes: ['tracking', 'cleaning'],
+    why: 'Bed managers see the patient arrive with one tap and the room turn clean with two, with no phone calls in between.',
+  },
+  {
+    label: 'Receiving nurse unavailable',
+    share: 21.6,
+    fixes: ['overlap'],
+    why: 'Nurses on 6-to-6 shifts take PACU arrivals while the 7 PM report runs.',
+  },
+  {
+    label: 'Assigned room not clean',
+    share: 13.2,
+    fixes: ['cleaning'],
+    why: 'Two taps tell the Command Center the moment a room is clean.',
+  },
+  {
+    label: 'Reason not documented',
+    share: 12.6,
+    fixes: ['tracking'],
+    why: 'A tap logs arrival and departure in Epic automatically, so the hold is on the record.',
+  },
   { label: 'PACU transport staff unavailable', share: 7.6, fixes: [] },
   { label: 'No transport out of the hospital', share: 5.7, fixes: [] },
   { label: 'Discharge criteria not met', share: 4.6, fixes: [] },

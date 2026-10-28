@@ -2,6 +2,8 @@ import { useMemo, useSyncExternalStore } from 'react'
 import type { ModuleKey } from './data/campus'
 
 // Hash routes (#/interviews …) so the site works on any static host and the back button closes panels.
+// A module may carry one sub-path (#/outcomes/tracking) for a page inside it; that part stays out of
+// Route, so moving between pages of one module never re-runs what follows the route (camera, focus).
 export type Route =
   | { name: 'map' }
   | { name: 'module'; key: ModuleKey }
@@ -10,8 +12,10 @@ export type Route =
 
 const MODULE_KEYS: ModuleKey[] = ['interviews', 'data', 'thinking', 'outcomes']
 
+const splitHash = (hash: string) => hash.replace(/^#\/?/, '').split('/')
+
 function parse(hash: string): Route {
-  const path = hash.replace(/^#\/?/, '')
+  const path = splitHash(hash)[0]
   if ((MODULE_KEYS as string[]).includes(path)) return { name: 'module', key: path as ModuleKey }
   if (path === 'overview' || path === 'about') return { name: path }
   return { name: 'map' }
@@ -29,8 +33,13 @@ const subscribe = (listener: () => void) => {
 }
 
 export function useRoute(): Route {
-  const hash = useSyncExternalStore(subscribe, () => window.location.hash)
-  return useMemo(() => parse(hash), [hash])
+  const path = useSyncExternalStore(subscribe, () => splitHash(window.location.hash)[0])
+  return useMemo(() => parse(path), [path])
+}
+
+/** The page inside the open module (#/outcomes/tracking → 'tracking'), if any. */
+export function useSubPath(): string | null {
+  return useSyncExternalStore(subscribe, () => splitHash(window.location.hash)[1] || null)
 }
 
 // panels opened from inside the app close with history.back(), so the back button stays in sync

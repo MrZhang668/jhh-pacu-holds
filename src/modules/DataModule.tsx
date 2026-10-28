@@ -1,18 +1,8 @@
 import { Fragment } from 'react'
-import {
-  AVERAGE_VS_THRESHOLD,
-  DATA_NOTE,
-  DESTINATIONS,
-  HOURLY_HEADLINE,
-  HOURLY_REASONS,
-  ORIGINS,
-  REASONS,
-  SOURCES,
-  TARGETED_SHARE,
-  type Fix,
-} from '../content/holdData'
+import { AVERAGE_VS_THRESHOLD, DATA_NOTE, DESTINATIONS, HOURLY_HEADLINE, HOURLY_REASONS, ORIGINS } from '../content/holdData'
 import { useIsNight } from '../state/hooks'
-import { ChartCard, LegendKey, pct, rampColor, useTooltip } from './viz'
+import { RoutedReasons } from './RoutedReasons'
+import { ChartCard, pct, rampColor, useTooltip } from './viz'
 
 // One-hue sequential ramps (light → Hopkins Blue; on the night surface, dark → light)
 const DAY_RAMP = ['#eef3f9', '#c9dcf1', '#93bfe8', '#5293d3', '#2263a8', '#002d72']
@@ -26,13 +16,9 @@ export default function DataModule() {
     <>
       <p className="data-note">{DATA_NOTE}</p>
       <HourHeatmap />
-      <ReasonBars />
+      <RoutedReasons />
       <OriginsDestinations />
       <ThresholdTile />
-      <FixCoverage />
-      <p className="sources">
-        {SOURCES.hourly} {SOURCES.tableau} {SOURCES.scope}
-      </p>
     </>
   )
 }
@@ -91,63 +77,6 @@ function HourHeatmap() {
   )
 }
 
-function ReasonBars() {
-  const { host, bind, element } = useTooltip()
-  const max = 25
-  let running = 0
-  const rows = REASONS.map((r) => ({ ...r, cumulative: (running += r.share) }))
-  const color = (fixes: Fix[]) => (fixes.length ? 'var(--viz-1)' : 'var(--viz-2)')
-  return (
-    <ChartCard
-      title="Why patients wait"
-      headline="Two reasons — no room assigned yet and no receiving nurse — make up 43% of holds; the top four reach 69%."
-      legend={
-        <>
-          <LegendKey color="var(--viz-1)" label="Targeted by our interventions" />
-          <LegendKey color="var(--viz-2)" label="Other reasons" />
-        </>
-      }
-    >
-      <div className="bars" ref={host}>
-        <div className="bar-row bar-axis" aria-hidden="true">
-          <span />
-          <span className="bar-track">
-            {[0, 10, 20].map((t) => (
-              <span key={t} className="tick" style={{ left: `${(t / max) * 100}%` }}>
-                {t}%
-              </span>
-            ))}
-          </span>
-          <span className="bar-cum">Cumulative</span>
-        </div>
-        {rows.map((r) => (
-          <div className="bar-row" key={r.label}>
-            <span className="bar-label">{r.label}</span>
-            <span className="bar-track">
-              {[10, 20].map((t) => (
-                <i key={t} className="grid" style={{ left: `${(t / max) * 100}%` }} aria-hidden="true" />
-              ))}
-              <span
-                className="bar"
-                tabIndex={0}
-                style={{ width: `${(r.share / max) * 100}%`, background: color(r.fixes) }}
-                {...bind({
-                  value: pct(r.share),
-                  label: r.label,
-                  sub: r.fixes.length ? `Targeted by ${r.fixes.join(' + ')}` : undefined,
-                })}
-              />
-              <span className="bar-value">{pct(r.share)}</span>
-            </span>
-            <span className="bar-cum">{pct(r.cumulative, 0)}</span>
-          </div>
-        ))}
-        {element}
-      </div>
-    </ChartCard>
-  )
-}
-
 function ShareList({ title, rows }: { title: string; rows: { label: string; share: number }[] }) {
   const { host, bind, element } = useTooltip()
   return (
@@ -177,7 +106,6 @@ function OriginsDestinations() {
     <ChartCard
       title="Where held patients come from and where they go"
       headline="Two operating-room groups produce about 72% of holds, and 82% of held patients are waiting for a regular (non-ICU) inpatient bed."
-      note={SOURCES.tableau}
     >
       <div className="share-grid">
         <ShareList title="Operating rooms the patients came from" rows={ORIGINS} />
@@ -204,42 +132,6 @@ function ThresholdTile() {
         <span style={{ left: '100%' }}>3×</span>
       </div>
       <p className="stat-note">A delay only counts as a hold once a ready patient has waited more than 30 minutes.</p>
-    </section>
-  )
-}
-
-const FIX_REASONS: { fix: Fix; reasons: string[] }[] = [
-  { fix: 'NFC tracking', reasons: ['Waiting for a room to be assigned', 'Reason not documented'] },
-  { fix: 'Shift overlap', reasons: ['Receiving nurse unavailable'] },
-  { fix: 'NFC bed cleaning', reasons: ['Assigned room not clean', 'Waiting for a room to be assigned'] },
-]
-
-function FixCoverage() {
-  const share = (label: string) => REASONS.find((r) => r.label === label)?.share ?? 0
-  return (
-    <section className="fix-coverage">
-      <h4>From data to fixes</h4>
-      <p>
-        About <b>{TARGETED_SHARE}%</b> of recorded hold reasons fall into categories that at least one of our three
-        interventions aims at.
-      </p>
-      <div className="meter" role="img" aria-label={`${TARGETED_SHARE}% of hold reasons targeted`}>
-        <span className="meter-fill" style={{ width: `${TARGETED_SHARE}%` }} />
-      </div>
-      <ul>
-        {FIX_REASONS.map((f) => (
-          <li key={f.fix}>
-            <b>{f.fix}</b>
-            <span>
-              {f.reasons.map((r) => (
-                <span key={r} className="chip">
-                  {r} · {pct(share(r))}
-                </span>
-              ))}
-            </span>
-          </li>
-        ))}
-      </ul>
     </section>
   )
 }

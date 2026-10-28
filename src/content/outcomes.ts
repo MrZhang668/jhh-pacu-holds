@@ -67,6 +67,62 @@ export const SOLUTIONS: Solution[] = [
   },
 ]
 
+export const SOLUTIONS_ZH: typeof SOLUTIONS = [
+  {
+    key: 'tracking',
+    n: '1',
+    title: 'NFC 患者追踪',
+    teaser: '在床旁轻触一下，每位 PACU 患者即出现在床位管理员的看板上。',
+    summary:
+      '每位手术患者领取一张可重复使用的 NFC 卡。在床旁读卡器上轻触，即可在 Epic 中自动记录到达和离开时间，患者一进入麻醉后恢复室（PACU），床位管理员就能看到。',
+    how: [
+      '患者进入手术室（OR）前，将其就诊记录与卡片绑定。',
+      '在每个护理区域到达和离开时轻触——与护士签到的手势相同。',
+      'Epic 记录时间和位置，并更新状态看板。',
+    ],
+    roles: [
+      { who: 'PACU 护士长', does: '批准工作流程变更、培训员工、跟踪推广使用情况' },
+      { who: '指挥中心负责人', does: '提交 Epic 工单，申请卡片绑定和位置自动更新' },
+      { who: 'Epic 分析师', does: '开发“轻触更新位置”功能，并将卡片 ID 与就诊记录对应' },
+    ],
+  },
+  {
+    key: 'overlap',
+    n: '2',
+    title: '错峰班次',
+    teaser: '“6 点至 6 点”班次的护士在晚 7 点交接班期间接收 PACU 转入患者。',
+    summary:
+      '约四分之一的住院病区护士改为上午 6 点至下午 6 点 / 下午 6 点至次日上午 6 点班次。他们在 6:15 前完成自己的交接，因此在 7 点交接班期间有人可以接收 PACU 患者。',
+    how: [
+      '约 75% 的护士保持“7 点至 7 点”班次，约 25% 改为“6 点至 6 点”。',
+      '“7 点至 7 点”护士交接时，由“6 点至 6 点”护士负责接收转入患者并支援其他病区。',
+      '公布新排班，并说明这一小时重叠为何重要。',
+    ],
+    roles: [
+      { who: '住院病区护士长', does: '制定配套排班，并为重叠时段安排人手' },
+      { who: '当班负责护士（charge nurse）', does: '将 PACU 转入患者分派给未在交接的护士' },
+    ],
+  },
+  {
+    key: 'cleaning',
+    n: '3',
+    title: 'NFC 床位清洁状态',
+    teaser: '轻触两下，房间一清洁完毕，指挥中心即刻知晓。',
+    summary:
+      '环境服务部（EVS）员工在开始和结束清洁房间时各轻触一次卡片。指挥中心可实时看到“清洁中”和“可分配”状态，无需等待电话通知。',
+    how: [
+      '第一次轻触：“清洁中”。第二次轻触：“清洁完成——可分配”。',
+      '距第一次轻触不足 7 分钟的第二次轻触将被忽略，因此连续误触无法伪造已清洁的房间。',
+      '状态一变更，床位管理员即可分配该房间。',
+    ],
+    roles: [
+      { who: 'EVS 主管', does: '将卡片纳入清洁流程，并培训每个班次的员工' },
+      { who: '指挥中心负责人', does: '提交 Epic 工单，申请两次轻触逻辑' },
+      { who: 'Epic 分析师', does: '开发状态变更、7 分钟防误触机制和看板' },
+    ],
+  },
+]
+
 /** Places that tried similar ideas (final report, "Worldwide Examples"). lat/lon for the map pins. */
 export const EXAMPLES = [
   {
@@ -103,4 +159,40 @@ export const EXAMPLES = [
   },
 ]
 
+export const EXAMPLES_ZH: typeof EXAMPLES = [
+  {
+    place: 'Mount Alvernia Hospital，新加坡',
+    lat: 1.35,
+    lon: 103.84,
+    effect: '−34%',
+    measure: '清洁响应时间',
+    what: '出院时投放 NFC 标签，触发保洁提醒并更新床位可用状态。',
+  },
+  {
+    place: 'Aalborg University Hospital，丹麦',
+    lat: 57.05,
+    lon: 9.92,
+    effect: '−20%',
+    measure: '任务启动时间',
+    what: '护士轻触 NFC 标签，一键申请床位清洁或撤床。',
+  },
+  {
+    place: '台湾地区的医院',
+    lat: 23.7,
+    lon: 121.0,
+    effect: '−30%',
+    measure: '入院办理时间',
+    what: '通过 RFID/NFC 标签在护士的移动设备上追踪入院和转科。',
+  },
+  {
+    place: 'MaineHealth，美国缅因州',
+    lat: 43.66,
+    lon: -70.26,
+    effect: '−15 至 20%',
+    measure: '交接期间的打断次数',
+    what: '错峰床旁交接班：护理助理比护士提前一小时交接。',
+  },
+]
+
 export const HOME = { place: 'The Johns Hopkins Hospital, Baltimore', lat: 39.3, lon: -76.59 }
+export const HOME_ZH: typeof HOME = { place: '约翰斯·霍普金斯医院，巴尔的摩', lat: 39.3, lon: -76.59 }

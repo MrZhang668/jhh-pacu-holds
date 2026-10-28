@@ -11,6 +11,8 @@ export interface LabelSpec {
   /** world position of the anchor (bottom-centre; centre for streets) */
   pos: [number, number, number]
   title: string
+  /** Chinese title, where the label is translated (building and street names stay in English) */
+  titleZh?: string
   module?: ModuleKey
   building?: string
   tier?: 'A' | 'B'
@@ -86,6 +88,7 @@ export function buildLabelSpecs(campus: Campus, showNames: boolean, showStreets:
         priority: 4,
         pos: [b.anchor[0], tag.y, b.anchor[1]],
         title: 'Shift change · 7 PM',
+        titleZh: '交接班 · 19:00',
         building: b.key,
         window: SHIFT_CHANGE,
       })

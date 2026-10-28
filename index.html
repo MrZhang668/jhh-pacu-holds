@@ -6,7 +6,7 @@
     <title>Reducing OR &amp; PACU Holds · JHH</title>
     <meta
       name="description"
-      content="Reducing OR and PACU holds at The Johns Hopkins Hospital: a JHU MSEM Team 6 project, explored through a 3D model of the East Baltimore campus."
+      content="Reducing OR and PACU holds at The Johns Hopkins Hospital: a JHU MSEM student project, explored through a 3D model of the East Baltimore campus."
     />
     <meta name="theme-color" content="#002d72" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -14,7 +14,7 @@
     <meta property="og:title" content="Reducing OR &amp; PACU Holds at The Johns Hopkins Hospital" />
     <meta
       property="og:description"
-      content="A JHU MSEM Team 6 project on post-operative patient flow, explored through a 3D model of the East Baltimore campus."
+      content="A JHU MSEM student project on post-operative patient flow, explored through a 3D model of the East Baltimore campus."
     />
     <meta property="og:url" content="%VITE_SITE_URL%" />
     <meta property="og:image" content="%VITE_SITE_URL%og.jpg" />
@@ -152,6 +152,16 @@
       ;(function () {
         var t = new URLSearchParams(location.search).get('time')
         if (t !== null && (Number(t) < 6 || Number(t) >= 18.5)) document.getElementById('boot').classList.add('night')
+        // and to the visitor's language (see src/state/lang.ts)
+        var lang = new URLSearchParams(location.search).get('lang')
+        try {
+          lang = lang || localStorage.getItem('jhh-lang')
+        } catch (e) {}
+        if (lang === 'zh') {
+          document.documentElement.lang = 'zh-CN'
+          document.querySelector('.boot-title').textContent = '减少手术室与 PACU 滞留'
+          document.querySelector('.boot-note').textContent = '正在加载园区模型…'
+        }
       })()
     </script>
     <noscript>

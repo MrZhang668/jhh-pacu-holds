@@ -47,3 +47,16 @@ export const INTERVIEWS = [
   'Bed Manager, Command Center — interview, 24 Sep 2025',
   'Bed Management Program Director — online interview, 26 Sep 2025',
 ]
+
+export const INTERVIEWS_ZH: typeof INTERVIEWS = [
+  '护士长，Weinberg 4CD —— 访谈，2025 年 9 月 8 日',
+  '护士长，Zayed 11E —— 线上访谈，2025 年 9 月 9 日',
+  '护士长，Zayed 9W —— 线上访谈，2025 年 9 月 18 日',
+  '麻醉与重症医学护理部副主任，及 Zayed 3、Zayed 5、Weinberg 3 三个 PACU 的护士长 —— 线上访谈，2025 年 9 月 18 日',
+  '当班负责护士（charge nurse），Weinberg 3 PACU —— 访谈，2025 年 9 月 19 日',
+  '护理督导 —— 访谈，2025 年 9 月 19 日',
+  '围术期服务护理部副主任 —— 访谈，2025 年 9 月 24 日',
+  '容量管理专员 —— 线上访谈，2025 年 9 月 24 日',
+  '床位管理员，指挥中心 —— 访谈，2025 年 9 月 24 日',
+  '床位管理项目主任 —— 线上访谈，2025 年 9 月 26 日',
+]

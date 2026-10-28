@@ -1,9 +1,20 @@
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react'
-import { MODULES } from '../content/modules'
-import { DMAIC, OVERVIEW, OVERVIEW_FOOTNOTE, PROJECT, TIMELINE } from '../content/overview'
-import { INTERVIEWS, PUBLISHED } from '../content/references'
+import { MODULES, MODULES_ZH } from '../content/modules'
+import {
+  DMAIC,
+  DMAIC_ZH,
+  OVERVIEW,
+  OVERVIEW_FOOTNOTE,
+  OVERVIEW_ZH,
+  PROJECT,
+  PROJECT_ZH,
+  TIMELINE,
+  TIMELINE_ZH,
+} from '../content/overview'
+import { INTERVIEWS, INTERVIEWS_ZH, PUBLISHED } from '../content/references'
 import type { ModuleKey } from '../data/campus'
 import type { Route } from '../router'
+import { useLang, useT } from '../state/lang'
 import { CloseIcon } from './icons'
 
 // module content loads on demand, keeping the first screen light
@@ -17,6 +28,10 @@ const MODULE_BODIES: Record<ModuleKey, ReturnType<typeof lazy>> = {
 /** The right-hand panel that opens over the map for a module, the full overview or About. */
 export function SidePanel({ route, onClose }: { route: Route; onClose: () => void }) {
   const heading = useRef<HTMLHeadingElement>(null)
+  const t = useT()
+  const zh = useLang() === 'zh'
+  const project = zh ? PROJECT_ZH : PROJECT
+  const interviews = zh ? INTERVIEWS_ZH : INTERVIEWS
   useEffect(() => {
     heading.current?.focus({ preventScroll: true })
   }, [route])
@@ -29,7 +44,7 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
   let body: ReactNode
 
   if (route.name === 'module') {
-    const m = MODULES[route.key]
+    const m = (zh ? MODULES_ZH : MODULES)[route.key]
     const Body = MODULE_BODIES[route.key]
     eyebrow = (
       <>
@@ -50,27 +65,27 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
             ))}
           </ul>
         )}
-        <Suspense fallback={<p className="loading-inline">Loading…</p>}>
+        <Suspense fallback={<p className="loading-inline">{t('Loading…', '加载中…')}</p>}>
           <Body />
         </Suspense>
       </>
     )
   } else if (route.name === 'overview') {
-    eyebrow = 'Project overview'
-    title = PROJECT.title
-    sub = PROJECT.subtitle
+    eyebrow = t('Project overview', '项目概览')
+    title = project.title
+    sub = project.subtitle
     body = (
       <>
-        {OVERVIEW.map((c) => (
+        {(zh ? OVERVIEW_ZH : OVERVIEW).map((c) => (
           <section key={c.key}>
             <h3>{c.heading}</h3>
             <p>{c.full}</p>
           </section>
         ))}
         <section>
-          <h3>How we worked: DMAIC</h3>
+          <h3>{t('How we worked: DMAIC', '工作方法：DMAIC')}</h3>
           <ol className="dmaic">
-            {DMAIC.map((d) => (
+            {(zh ? DMAIC_ZH : DMAIC).map((d) => (
               <li key={d.step}>
                 <b>{d.step}</b>
                 <span>{d.text}</span>
@@ -79,12 +94,12 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
           </ol>
         </section>
         <section>
-          <h3>Timeline</h3>
+          <h3>{t('Timeline', '时间线')}</h3>
           <ol className="timeline">
-            {TIMELINE.map((t) => (
-              <li key={t.date}>
-                <time>{t.date}</time>
-                <span>{t.text}</span>
+            {(zh ? TIMELINE_ZH : TIMELINE).map((e) => (
+              <li key={e.date}>
+                <time>{e.date}</time>
+                <span>{e.text}</span>
               </li>
             ))}
           </ol>
@@ -93,51 +108,66 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
       </>
     )
   } else {
-    eyebrow = 'About'
-    title = 'Team, hosts & credits'
-    sub = PROJECT.team
+    eyebrow = t('About', '关于')
+    title = t('Team, hosts & credits', '团队、指导方与致谢')
+    sub = project.team
     body = (
       <>
         <section>
-          <h3>Team</h3>
-          <p>Heather Li, Sanket Sachin Navale and Wandong Zhang — MSEM, Johns Hopkins Whiting School of Engineering.</p>
-        </section>
-        <section>
-          <h3>Hosts</h3>
+          <h3>{t('Team', '团队')}</h3>
           <p>
-            Dr. Sharon Owens, Director of Nursing for Surgery and Physical Medicine &amp; Rehabilitation, and Amy Hampt,
-            Assistant Director of Nursing for Surgery and PM&amp;R.
+            {t(
+              'Heather Li, Sanket Sachin Navale and Wandong Zhang — MSEM, Johns Hopkins Whiting School of Engineering.',
+              'Heather Li、Sanket Sachin Navale、Wandong Zhang —— 约翰斯·霍普金斯大学怀廷工程学院工程管理硕士（MSEM）。',
+            )}
           </p>
         </section>
         <section>
-          <h3>Thank you</h3>
+          <h3>{t('Hosts', '项目指导方')}</h3>
           <p>
-            Rose Karlan (Weinberg 4CD), Patty Guthrie (Weinberg 3) and bed manager Mel Vista (Command Center) for
-            opening their units to us, and the clinical and administrative staff who made time for interviews.
+            {t(
+              'Dr. Sharon Owens, Director of Nursing for Surgery and Physical Medicine & Rehabilitation, and Amy Hampt, Assistant Director of Nursing for Surgery and PM&R.',
+              'Sharon Owens 博士，外科及物理医学与康复科（PM&R）护理部主任；Amy Hampt，外科及 PM&R 护理部副主任。',
+            )}
           </p>
         </section>
         <section>
-          <h3>About this site</h3>
+          <h3>{t('Thank you', '致谢')}</h3>
           <p>
-            An independent student project (JHU MSEM Team 6), not an official Johns Hopkins Medicine website. Hold data
-            are derived and normalized from 90 days of internal operational data; they are not official JHH statistics.
-          </p>
-          <p>
-            Campus model from OpenStreetMap data (© OpenStreetMap contributors, ODbL), with building names after the
-            Johns Hopkins Medical Campus map (March 2025). World outline from Natural Earth.
+            {t(
+              'Rose Karlan (Weinberg 4CD), Patty Guthrie (Weinberg 3) and bed manager Mel Vista (Command Center) for opening their units to us, and the clinical and administrative staff who made time for interviews.',
+              '感谢 Rose Karlan（Weinberg 4CD）、Patty Guthrie（Weinberg 3）及床位管理员 Mel Vista（指挥中心）向我们开放所在部门，也感谢抽出时间接受访谈的临床与行政人员。',
+            )}
           </p>
         </section>
         <section>
-          <h3>References</h3>
+          <h3>{t('About this site', '关于本网站')}</h3>
+          <p>
+            {t(
+              'An independent student project (JHU MSEM), not an official Johns Hopkins Medicine website. Hold data are derived and normalized from 90 days of internal operational data; they are not official JHH statistics.',
+              '本网站为独立学生项目（JHU MSEM），并非约翰斯·霍普金斯医学官方网站。滞留数据由 90 天的内部运营数据推导并归一化处理而来，不代表约翰斯·霍普金斯医院的官方统计。',
+            )}
+          </p>
+          <p>
+            {t(
+              'Campus model from OpenStreetMap data (© OpenStreetMap contributors, ODbL), with building names after the Johns Hopkins Medical Campus map (March 2025). World outline from Natural Earth.',
+              '园区模型基于 OpenStreetMap 数据（© OpenStreetMap 贡献者，ODbL 许可），建筑名称参照约翰斯·霍普金斯医学园区地图（2025 年 3 月版）。世界轮廓数据来自 Natural Earth。',
+            )}
+          </p>
+        </section>
+        <section>
+          <h3>{t('References', '参考文献')}</h3>
           <details className="guide" open>
-            <summary>Published sources ({PUBLISHED.length})</summary>
+            <summary>
+              {t('Published sources', '公开文献')} ({PUBLISHED.length})
+            </summary>
             <ol className="refs">
               {PUBLISHED.map((r) => (
                 <li key={r.text}>
                   {r.text}{' '}
                   {r.url && (
                     <a href={r.url} target="_blank" rel="noreferrer">
-                      Link
+                      {t('Link', '链接')}
                     </a>
                   )}
                 </li>
@@ -145,9 +175,11 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
             </ol>
           </details>
           <details className="guide">
-            <summary>Interviews, by role ({INTERVIEWS.length})</summary>
+            <summary>
+              {t('Interviews, by role', '访谈（按职位）')} ({interviews.length})
+            </summary>
             <ol className="refs">
-              {INTERVIEWS.map((r) => (
+              {interviews.map((r) => (
                 <li key={r}>{r}</li>
               ))}
             </ol>
@@ -166,7 +198,7 @@ export function SidePanel({ route, onClose }: { route: Route; onClose: () => voi
           {title}
         </h2>
         {sub && <p className="panel-sub">{sub}</p>}
-        <button type="button" className="close" onClick={onClose} aria-label="Close and return to the map">
+        <button type="button" className="close" onClick={onClose} aria-label={t('Close and return to the map', '关闭并返回地图')}>
           <CloseIcon />
         </button>
       </header>

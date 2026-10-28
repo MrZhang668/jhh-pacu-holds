@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { REASONS, TARGETED_SHARE, type FixKey } from '../content/holdData'
-import { SOLUTIONS } from '../content/outcomes'
+import { REASONS, REASONS_ZH, TARGETED_SHARE, type FixKey } from '../content/holdData'
+import { SOLUTIONS, SOLUTIONS_ZH, type Solution } from '../content/outcomes'
 import { navigate } from '../router'
+import { useL, useT } from '../state/lang'
 import { Sketch } from './sketches'
 import { ChartCard, LegendKey, pct } from './viz'
 
@@ -15,10 +16,16 @@ type Focus = { kind: 'reason'; i: number } | { kind: 'fix'; key: FixKey }
 
 const MAX = 25
 const OUT_OF_SCOPE = 'Outside our three fixes: a candidate for the next round.'
+const OUT_OF_SCOPE_ZH = '不在我们三项改进措施的范围内，可作为下一轮改进的候选。'
 const FIX_SHARE = Object.fromEntries(
   SOLUTIONS.map((s) => [s.key, REASONS.reduce((sum, r) => sum + (r.fixes.includes(s.key) ? r.share : 0), 0)]),
 ) as Record<FixKey, number>
-const solution = (key: FixKey) => SOLUTIONS.find((s) => s.key === key)!
+const findSolution = (list: Solution[], key: FixKey) => list.find((s) => s.key === key)!
+/** The intervention lookup for the current language. */
+function useSolutions() {
+  const list = useL(SOLUTIONS, SOLUTIONS_ZH)
+  return { list, solution: (key: FixKey) => findSolution(list, key) }
+}
 const openFix = (key: FixKey) => navigate(`outcomes/${key}`)
 
 interface Wire {
@@ -30,6 +37,9 @@ interface Wire {
 }
 
 export function RoutedReasons() {
+  const t = useT()
+  const reasons = useL(REASONS, REASONS_ZH)
+  const { list: solutions, solution } = useSolutions()
   const host = useRef<HTMLDivElement>(null)
   const values = useRef<(HTMLSpanElement | null)[]>([])
   const rows = useRef<(HTMLElement | null)[]>([])
@@ -80,6 +90,9 @@ export function RoutedReasons() {
     document.fonts?.ready.then(layout)
     return () => ro.disconnect()
   }, [layout])
+
+  // labels change length with the language, which moves the value labels the wires start from
+  useLayoutEffect(layout, [reasons, layout])
 
   // the card sits under the hovered row, or beside the hovered intervention
   useLayoutEffect(() => {
@@ -147,15 +160,18 @@ export function RoutedReasons() {
 
   return (
     <ChartCard
-      title="Why patients wait, and where each reason goes"
-      headline={`Four reasons cover ${TARGETED_SHARE}% of holds, and each one already has a fix waiting for it.`}
+      title={t('Why patients wait, and where each reason goes', '患者为何等待，以及各原因的对应措施')}
+      headline={t(
+        `Four reasons cover ${TARGETED_SHARE}% of holds, and each one already has a fix waiting for it.`,
+        `四个原因覆盖了 ${TARGETED_SHARE}% 的滞留，而且每个原因都已有对应的改进措施。`,
+      )}
       legend={
         <>
           <span className="legend-key">
             <i className="wire-key" aria-hidden="true" />
-            Gold line: routed to an intervention
+            {t('Gold line: routed to an intervention', '金色线：对应到改进措施')}
           </span>
-          <LegendKey color="var(--viz-2)" label="Grey: outside our scope" />
+          <LegendKey color="var(--viz-2)" label={t('Grey: outside our scope', '灰色：不在本项目范围内')} />
         </>
       }
     >
@@ -172,7 +188,7 @@ export function RoutedReasons() {
                 ))}
               </span>
             </div>
-            {REASONS.map((r, i) => {
+            {reasons.map((r, i) => {
               const targeted = r.fixes.length > 0
               const body = (
                 <>
@@ -210,7 +226,10 @@ export function RoutedReasons() {
                   type="button"
                   {...common}
                   ref={(el) => void (rows.current[i] = el)}
-                  aria-label={`${r.label}, ${pct(r.share)} of holds. Routed to ${r.fixes.map((k) => solution(k).title).join(' and ')}.`}
+                  aria-label={t(
+                    `${r.label}, ${pct(r.share)} of holds. Routed to ${r.fixes.map((k) => solution(k).title).join(' and ')}.`,
+                    `${r.label}，占滞留的 ${pct(r.share)}。对应措施：${r.fixes.map((k) => solution(k).title).join('、')}。`,
+                  )}
                   aria-haspopup={r.fixes.length > 1 ? 'true' : undefined}
                   onClick={() => pick(i)}
                 >
@@ -222,7 +241,10 @@ export function RoutedReasons() {
                   {...common}
                   ref={(el) => void (rows.current[i] = el)}
                   tabIndex={0}
-                  aria-label={`${r.label}, ${pct(r.share)} of holds. ${OUT_OF_SCOPE}`}
+                  aria-label={t(
+                    `${r.label}, ${pct(r.share)} of holds. ${OUT_OF_SCOPE}`,
+                    `${r.label}，占滞留的 ${pct(r.share)}。${OUT_OF_SCOPE_ZH}`,
+                  )}
                 >
                   {body}
                 </div>
@@ -243,7 +265,7 @@ export function RoutedReasons() {
           </svg>
 
           <div className="route-fixes" ref={columnOfFixes}>
-            {SOLUTIONS.map((s) => (
+            {solutions.map((s) => (
               <button
                 key={s.key}
                 type="button"
@@ -257,7 +279,9 @@ export function RoutedReasons() {
               >
                 <Sketch kind={s.key} />
                 <span className="route-fix-title">{s.title}</span>
-                <span className="route-fix-share">answers {pct(FIX_SHARE[s.key], 0)} of holds</span>
+                <span className="route-fix-share">
+                  {t(`answers ${pct(FIX_SHARE[s.key], 0)} of holds`, `应对 ${pct(FIX_SHARE[s.key], 0)} 的滞留`)}
+                </span>
               </button>
             ))}
           </div>
@@ -267,7 +291,7 @@ export function RoutedReasons() {
               ref={card}
               className={`route-card${pinned !== null ? ' is-pinned' : ''}`}
               role={pinned !== null ? 'dialog' : 'status'}
-              aria-label={pinned !== null ? 'Choose an intervention' : undefined}
+              aria-label={pinned !== null ? t('Choose an intervention', '选择一项改进措施') : undefined}
               style={cardAt ? { top: cardAt.top, left: cardAt.left } : { visibility: 'hidden' }}
             >
               {focus.kind === 'reason' ? <ReasonCard i={focus.i} pinned={pinned !== null} /> : <FixCard fix={focus.key} />}
@@ -280,16 +304,25 @@ export function RoutedReasons() {
 }
 
 function ReasonCard({ i, pinned }: { i: number; pinned: boolean }) {
-  const r = REASONS[i]
+  const t = useT()
+  const r = useL(REASONS, REASONS_ZH)[i]
+  const { solution } = useSolutions()
   return (
     <>
       <p className="rc-figure">
-        <b>{pct(r.share)}</b> of holds
+        {t(
+          <>
+            <b>{pct(r.share)}</b> of holds
+          </>,
+          <>
+            占滞留的 <b>{pct(r.share)}</b>
+          </>,
+        )}
       </p>
       <p className="rc-title">{r.label}</p>
       {r.fixes.length ? (
         <>
-          <p className="rc-route">{pinned ? 'Two fixes meet here. Open one:' : 'Routed to'}</p>
+          <p className="rc-route">{pinned ? t('Two fixes meet here. Open one:', '两项措施在此交汇，请选择一项打开：') : t('Routed to', '对应措施')}</p>
           <ul className="rc-fixes">
             {r.fixes.map((k, n) => (
               <li key={k}>
@@ -305,25 +338,34 @@ function ReasonCard({ i, pinned }: { i: number; pinned: boolean }) {
             ))}
           </ul>
           <p className="rc-why">{r.why}</p>
-          {!pinned && <p className="rc-hint">{r.fixes.length > 1 ? 'Click to choose a fix' : 'Click to open the fix'} →</p>}
+          {!pinned && <p className="rc-hint">{r.fixes.length > 1 ? t('Click to choose a fix', '点击选择措施') : t('Click to open the fix', '点击打开措施')} →</p>}
         </>
       ) : (
-        <p className="rc-why">{OUT_OF_SCOPE}</p>
+        <p className="rc-why">{t(OUT_OF_SCOPE, OUT_OF_SCOPE_ZH)}</p>
       )}
     </>
   )
 }
 
 function FixCard({ fix }: { fix: FixKey }) {
-  const s = solution(fix)
+  const t = useT()
+  const reasons = useL(REASONS, REASONS_ZH)
+  const s = useSolutions().solution(fix)
   return (
     <>
       <p className="rc-figure">
-        <b>{pct(FIX_SHARE[fix], 0)}</b> of holds route here
+        {t(
+          <>
+            <b>{pct(FIX_SHARE[fix], 0)}</b> of holds route here
+          </>,
+          <>
+            <b>{pct(FIX_SHARE[fix], 0)}</b> 的滞留对应此措施
+          </>,
+        )}
       </p>
       <p className="rc-title">{s.title}</p>
       <ul className="rc-fixes">
-        {REASONS.filter((r) => r.fixes.includes(fix)).map((r) => (
+        {reasons.filter((r) => r.fixes.includes(fix)).map((r) => (
           <li key={r.label}>
             <span>
               {r.label} · {pct(r.share)}
@@ -332,7 +374,7 @@ function FixCard({ fix }: { fix: FixKey }) {
         ))}
       </ul>
       <p className="rc-why">{s.teaser}</p>
-      <p className="rc-hint">Click to see how it works →</p>
+      <p className="rc-hint">{t('Click to see how it works →', '点击查看具体做法 →')}</p>
     </>
   )
 }

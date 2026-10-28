@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { EXAMPLES, HOME, SOLUTIONS, type Solution } from '../content/outcomes'
+import { EXAMPLES, EXAMPLES_ZH, HOME, HOME_ZH, SOLUTIONS, SOLUTIONS_ZH, type Solution } from '../content/outcomes'
 import { WORLD, WORLD_LAND } from '../content/worldLand'
 import { CloseIcon } from '../ui/icons'
 import { navigate, useSubPath } from '../router'
+import { useL, useT } from '../state/lang'
 import { CleaningScene, OverlapScene, TrackingScene } from './SceneFlow'
 import { Sketch } from './sketches'
 import { useTooltip } from './viz'
@@ -15,6 +16,8 @@ type SolutionKey = Solution['key']
  */
 export default function OutcomesModule() {
   const sub = useSubPath()
+  const t = useT()
+  const solutions = useL(SOLUTIONS, SOLUTIONS_ZH)
   const open = SOLUTIONS.some((sol) => sol.key === sub) ? (sub as SolutionKey) : null
   const top = useRef<HTMLDivElement>(null)
   const from = useRef<SolutionKey | null>(null)
@@ -28,29 +31,29 @@ export default function OutcomesModule() {
 
   const show = (key: SolutionKey | null) => navigate(key ? `outcomes/${key}` : 'outcomes')
 
-  const i = SOLUTIONS.findIndex((s) => s.key === open)
-  const s = SOLUTIONS[i]
+  const i = solutions.findIndex((s) => s.key === open)
+  const s = solutions[i]
   return (
     <div ref={top} className="outcomes-body">
       {s ? (
         <>
           <button type="button" className="back-link" onClick={() => show(null)}>
-            ← All interventions
+            {t('← All interventions', '← 全部改进措施')}
           </button>
           <SolutionCard s={s} />
         </>
       ) : (
         <>
           <section>
-            <h3>Three interventions</h3>
+            <h3>{t('Three interventions', '三项改进措施')}</h3>
             <div className="solution-cards">
-              {SOLUTIONS.map((sol) => (
+              {solutions.map((sol) => (
                 <button key={sol.key} id={`card-${sol.key}`} type="button" className="solution-card" onClick={() => show(sol.key)}>
                   <Sketch kind={sol.key} />
-                  <span className="eyebrow">Intervention {sol.n}</span>
+                  <span className="eyebrow">{t(`Intervention ${sol.n}`, `改进措施 ${sol.n}`)}</span>
                   <span className="solution-card-title">{sol.title}</span>
                   <span className="solution-card-teaser">{sol.teaser}</span>
-                  <span className="solution-card-more">See how it works →</span>
+                  <span className="solution-card-more">{t('See how it works →', '了解具体做法 →')}</span>
                 </button>
               ))}
             </div>
@@ -63,9 +66,10 @@ export default function OutcomesModule() {
 }
 
 function SolutionCard({ s }: { s: Solution }) {
+  const t = useT()
   return (
     <section className="solution">
-      <p className="eyebrow">Intervention {s.n}</p>
+      <p className="eyebrow">{t(`Intervention ${s.n}`, `改进措施 ${s.n}`)}</p>
       <h3 className="solution-title">{s.title}</h3>
       <p>{s.summary}</p>
       {s.key === 'tracking' && <TrackingScene />}
@@ -74,7 +78,7 @@ function SolutionCard({ s }: { s: Solution }) {
       {/* the detail folds away so the picture and the demo lead */}
       <div className="solution-cols">
         <details className="guide">
-          <summary>How it works</summary>
+          <summary>{t('How it works', '具体做法')}</summary>
           <ol>
             {s.how.map((h) => (
               <li key={h}>{h}</li>
@@ -82,7 +86,7 @@ function SolutionCard({ s }: { s: Solution }) {
           </ol>
         </details>
         <details className="guide">
-          <summary>Who does what</summary>
+          <summary>{t('Who does what', '分工')}</summary>
           <ul className="roles">
             {s.roles.map((r) => (
               <li key={r.who}>
@@ -101,21 +105,24 @@ const my = (lat: number) => ((WORLD.north - lat) / 360) * WORLD.width
 
 function ExamplesMap() {
   const { host, bind, element } = useTooltip()
+  const t = useT()
+  const examples = useL(EXAMPLES, EXAMPLES_ZH)
+  const home = useL(HOME, HOME_ZH)
   // the card for a hospital appears only once its pin is clicked
   const [open, setOpen] = useState<number | null>(null)
   const toggle = (i: number) => setOpen((o) => (o === i ? null : i))
-  const shown = open === null ? null : EXAMPLES[open]
+  const shown = open === null ? null : examples[open]
   return (
     <section>
-      <h3>Who has tried this</h3>
+      <h3>{t('Who has tried this', '其他机构的实践')}</h3>
       <div className="world" ref={host}>
-        <svg viewBox={`0 0 ${WORLD.width} ${WORLD.height}`} role="group" aria-label="World map of the four hospitals with similar programs, and Johns Hopkins in Baltimore">
+        <svg viewBox={`0 0 ${WORLD.width} ${WORLD.height}`} role="group" aria-label={t('World map of the four hospitals with similar programs, and Johns Hopkins in Baltimore', '世界地图：四家开展类似项目的医院，以及位于巴尔的摩的约翰斯·霍普金斯医院')}>
           <path d={WORLD_LAND} className="land" />
-          <g transform={`translate(${mx(HOME.lon)} ${my(HOME.lat)})`} {...bind({ value: 'JHH', label: HOME.place, sub: 'our pilot units' })} tabIndex={0}>
+          <g transform={`translate(${mx(home.lon)} ${my(home.lat)})`} {...bind({ value: 'JHH', label: home.place, sub: t('our pilot units', '我们的试点病区') })} tabIndex={0}>
             <circle r={22} className="hit" />
             <circle r={9} className="pin home" />
           </g>
-          {EXAMPLES.map((e, i) => (
+          {examples.map((e, i) => (
             <g
               key={e.place}
               className={`example-pin${open === i ? ' is-open' : ''}`}
@@ -131,7 +138,7 @@ function ExamplesMap() {
                   toggle(i)
                 }
               }}
-              {...bind({ value: e.effect, label: e.place, sub: 'click for details' })}
+              {...bind({ value: e.effect, label: e.place, sub: t('click for details', '点击查看详情') })}
             >
               <circle r={22} className="hit" />
               <circle r={13} className="pin" />
@@ -149,7 +156,7 @@ function ExamplesMap() {
             <p className="eyebrow">
               <span className="num">{open + 1}</span> {shown.place}
             </p>
-            <button type="button" className="example-close" aria-label="Close" onClick={() => setOpen(null)}>
+            <button type="button" className="example-close" aria-label={t('Close', '关闭')} onClick={() => setOpen(null)}>
               <CloseIcon />
             </button>
             <p className="example-value">{shown.effect}</p>
@@ -157,10 +164,10 @@ function ExamplesMap() {
             <p>{shown.what}</p>
           </article>
         ) : (
-          <p className="example-hint">Click a numbered pin to see what that hospital did and what changed.</p>
+          <p className="example-hint">{t('Click a numbered pin to see what that hospital did and what changed.', '点击带编号的标记，查看该医院的做法及带来的变化。')}</p>
         )}
       </div>
-      <p className="sources">Gold dot: The Johns Hopkins Hospital. Figures as reported by each program (see References in About).</p>
+      <p className="sources">{t('Gold dot: The Johns Hopkins Hospital. Figures as reported by each program (see References in About).', '金色圆点：约翰斯·霍普金斯医院。数据均为各项目自行报告（参见“关于”页中的参考文献）。')}</p>
     </section>
   )
 }

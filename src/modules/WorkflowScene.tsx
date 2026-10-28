@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { FLOW } from '../content/thinking'
+import { FLOW, FLOW_ZH } from '../content/thinking'
+import { useL, useT } from '../state/lang'
 import { Bed, BoardCard, Monitor, Packet, Patient, Person, Scene, Sign, Watcher, type Spot } from './SceneFlow'
 
 // Appendix A as an illustrated walk: one patient goes OR → PACU → inpatient unit → home, one step per
@@ -18,6 +19,18 @@ const STEPS = [
   },
   { caption: 'Transfer 2 · The bed is cleaned and assigned and a nurse is free: the patient moves to the unit.', action: 'Discharge' },
   { caption: 'Discharge · The patient goes home and the bed turns over for the next admission.', action: 'Replay' },
+]
+
+const STEPS_ZH: typeof STEPS = [
+  { caption: '手术结束。手术室团队致电 PACU，准备将患者送过去。', action: '转往 PACU' },
+  { caption: '转运 1 · 转运员将患者从手术室推往 PACU。', action: '到达 PACU' },
+  { caption: '恢复 · PACU 护士持续观察患者，直到其可以转往病区。', action: '可以转出' },
+  {
+    caption: '滞留 · 患者已可离开，但病区床位尚未清洁或分配，也没有空闲的护士。患者只能在 PACU 等待。',
+    action: '腾出床位和护士',
+  },
+  { caption: '转运 2 · 床位已清洁并分配，护士也已空出：患者转入病区。', action: '出院' },
+  { caption: '出院 · 患者回家，床位完成周转，迎接下一位入院患者。', action: '重播' },
 ]
 
 const HOLD = 3
@@ -66,18 +79,31 @@ const BED = icon(
   </>,
 )
 
-const spots = (step: number): Spot[] => [
-  { key: 'or', x: 150, y: 118, title: 'OR load', items: FLOW.orInputs, icon: CALENDAR, active: step === 0 },
-  { key: 'transfer', x: 230, y: 236, title: 'Transfer', items: FLOW.transfer, icon: STRETCHER, active: step === 1 || step === 4 },
-  { key: 'pacu', x: 470, y: 176, title: 'PACU nurses', items: FLOW.nurse, icon: NURSE, active: step === 2 || step === HOLD },
-  { key: 'manager', x: 716, y: 34, title: 'Bed manager', items: FLOW.bedManager, icon: PHONE, active: step === HOLD || step === 4 },
-  { key: 'beds', x: 675, y: 346, title: 'Beds', items: FLOW.bed, icon: BED, active: step >= HOLD },
-  { key: 'unit', x: 848, y: 288, title: 'Inpatient nurses', items: FLOW.nurse, icon: NURSE, active: step === HOLD || step === 4 },
+const SPOT_TITLES = { or: 'OR load', transfer: 'Transfer', pacu: 'PACU nurses', manager: 'Bed manager', beds: 'Beds', unit: 'Inpatient nurses' }
+const SPOT_TITLES_ZH: typeof SPOT_TITLES = {
+  or: '手术室负荷',
+  transfer: '转运',
+  pacu: 'PACU 护士',
+  manager: '床位管理员',
+  beds: '床位',
+  unit: '住院病区护士',
+}
+
+const spots = (step: number, flow: typeof FLOW, title: typeof SPOT_TITLES): Spot[] => [
+  { key: 'or', x: 150, y: 118, title: title.or, items: flow.orInputs, icon: CALENDAR, active: step === 0 },
+  { key: 'transfer', x: 230, y: 236, title: title.transfer, items: flow.transfer, icon: STRETCHER, active: step === 1 || step === 4 },
+  { key: 'pacu', x: 470, y: 176, title: title.pacu, items: flow.nurse, icon: NURSE, active: step === 2 || step === HOLD },
+  { key: 'manager', x: 716, y: 34, title: title.manager, items: flow.bedManager, icon: PHONE, active: step === HOLD || step === 4 },
+  { key: 'beds', x: 675, y: 346, title: title.beds, items: flow.bed, icon: BED, active: step >= HOLD },
+  { key: 'unit', x: 848, y: 288, title: title.unit, items: flow.nurse, icon: NURSE, active: step === HOLD || step === 4 },
 ]
+
+// a Chinese character in the small bold label is about as wide as two Latin glyphs
+const labelWidth = (label: string) => [...label].reduce((w, c) => w + (/[\u2e80-\u9fff\uff00-\uffef]/.test(c) ? 13 : 7), 0)
 
 /** A blocker on the path: red with a cross during the hold, green with a tick once it clears. */
 function Blocker({ x, y, label, cleared }: { x: number; y: number; label: string; cleared: boolean }) {
-  const w = label.length * 7 + 34
+  const w = labelWidth(label) + 34
   return (
     <g className="sc-fade">
       <rect className="sc-line thin" fill={cleared ? '#dcefe1' : '#f6dcd7'} x={x - w / 2} y={y - 13} width={w} height="26" rx="13" />
@@ -98,9 +124,13 @@ function Blocker({ x, y, label, cleared }: { x: number; y: number; label: string
 }
 
 export function WorkflowScene() {
+  const t = useT()
+  const steps = useL(STEPS, STEPS_ZH)
+  const flow = useL(FLOW, FLOW_ZH)
+  const titles = useL(SPOT_TITLES, SPOT_TITLES_ZH)
   const [step, setStep] = useState(0)
-  const done = step === STEPS.length - 1
-  const s = STEPS[step]
+  const done = step === steps.length - 1
+  const s = steps[step]
   const gx = GURNEY_X[step]
   const moving = step === 1 || step === 4
   const holding = step === HOLD
@@ -108,11 +138,14 @@ export function WorkflowScene() {
   const toUnit = 'M600 130C600 144 640 140 640 150'
   return (
     <Scene
-      label="Illustration of a surgical patient’s path: operating room, transfer, PACU, a hold waiting for a clean, assigned bed and a free nurse, the inpatient unit, then home. Icons open what loads each step."
-      spots={spots(step)}
+      label={t(
+        'Illustration of a surgical patient’s path: operating room, transfer, PACU, a hold waiting for a clean, assigned bed and a free nurse, the inpatient unit, then home. Icons open what loads each step.',
+        '手术患者流转路径示意图：手术室、转运、PACU、等待已清洁并分配的床位及空闲护士的滞留、住院病区，最后出院回家。点击图标可查看影响各环节的因素。',
+      )}
+      spots={spots(step, flow, titles)}
       caption={s.caption}
       step={step}
-      steps={STEPS.length - 1}
+      steps={steps.length - 1}
       action={s.action}
       onAction={() => setStep(done ? 0 : step + 1)}
       onReset={() => setStep(0)}
@@ -127,10 +160,10 @@ export function WorkflowScene() {
       <rect fill="#e9eef3" x="560" y="150" width="240" height="230" rx="4" />
       <rect fill="#e9eef3" x="830" y="150" width="160" height="230" rx="4" />
       <rect className={`sc-hold${holding ? ' is-on' : ''}`} x="270" y="150" width="230" height="236" rx="10" />
-      <Sign x={60} y={176} text="OR" w={70} />
+      <Sign x={60} y={176} text={t('OR', '手术室')} w={70} />
       <Sign x={360} y={176} text="PACU" />
-      <Sign x={640} y={176} text="Inpatient" w={130} />
-      <Sign x={910} y={176} text="Home" w={92} />
+      <Sign x={640} y={176} text={t('Inpatient', '住院病区')} w={130} />
+      <Sign x={910} y={176} text={t('Home', '回家')} w={92} />
 
       {/* operating room: the light over the table, and the surgeon behind it */}
       <path className="sc-line" fill="none" d="M150 136v56" />
@@ -207,23 +240,28 @@ export function WorkflowScene() {
       {/* what the patient waits on */}
       {step >= HOLD && step < 5 && (
         <>
-          <Blocker x={530} y={142} label={step === HOLD ? 'No bed assigned' : 'Bed assigned'} cleared={step > HOLD} />
-          <Blocker x={676} y={232} label={step === HOLD ? 'Bed not clean' : 'Bed clean'} cleared={step > HOLD} />
-          <Blocker x={790} y={196} label={step === HOLD ? 'Nurse busy' : 'Nurse free'} cleared={step > HOLD} />
+          <Blocker
+            x={530}
+            y={142}
+            label={step === HOLD ? t('No bed assigned', '未分配床位') : t('Bed assigned', '已分配床位')}
+            cleared={step > HOLD}
+          />
+          <Blocker x={676} y={232} label={step === HOLD ? t('Bed not clean', '床位未清洁') : t('Bed clean', '床位已清洁')} cleared={step > HOLD} />
+          <Blocker x={790} y={196} label={step === HOLD ? t('Nurse busy', '护士忙碌') : t('Nurse free', '护士空闲')} cleared={step > HOLD} />
         </>
       )}
 
       {/* Command Center: the bed board, watched by the bed manager */}
-      <Monitor x={420} y={8} w={220} h={122} title="Bed board">
-        {['PACU', 'Unit bed'].map((c, i) => (
-          <g key={c}>
+      <Monitor x={420} y={8} w={220} h={122} title={t('Bed board', '床位看板')}>
+        {['PACU', t('Unit bed', '病区床位')].map((c, i) => (
+          <g key={i}>
             <rect fill={i === 1 && step === 4 ? '#dcefe1' : '#f0f3f7'} x={430 + i * 102} y="58" width="96" height="62" rx="5" />
             <text className="sc-small muted" x={478 + i * 102} y="74" textAnchor="middle">
               {c}
             </text>
           </g>
         ))}
-        {step >= 2 && !done && <BoardCard x={step >= 4 ? 542 : 440} y={80} label="Pt A" tone={step >= 4 ? 'green' : step === HOLD ? 'gold' : 'blue'} />}
+        {step >= 2 && !done && <BoardCard x={step >= 4 ? 542 : 440} y={80} label={t('Pt A', '患者 A')} tone={step >= 4 ? 'green' : step === HOLD ? 'gold' : 'blue'} />}
       </Monitor>
       <Watcher x={688} y={134} />
       <path className="sc-wire" d={toPacu} />

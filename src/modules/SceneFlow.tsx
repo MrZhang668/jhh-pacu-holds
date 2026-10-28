@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useMediaQuery } from '../state/hooks'
+import { useL, useT } from '../state/lang'
 
 // The two NFC interventions as illustrated scenes: one button walks through the taps, the people and
 // screens react, and the detail sits behind info dots instead of in paragraphs. Drawn in the site's
@@ -183,6 +184,7 @@ interface SceneProps {
 }
 
 export function Scene({ label, spots, caption, step, steps, action, onAction, onReset, children, w = W, h = H }: SceneProps) {
+  const t = useT()
   const [open, setOpen] = useState<string | null>(null)
   const spot = spots.find((s) => s.key === open)
   return (
@@ -198,7 +200,7 @@ export function Scene({ label, spots, caption, step, steps, action, onAction, on
               type="button"
               className={`sc-dot${s.icon ? ' sc-badge' : ''}${s.active ? ' is-active' : ''}${open === s.key ? ' is-open' : ''}`}
               style={{ left: `${(s.x / w) * 100}%`, top: `${(s.y / h) * 100}%` }}
-              aria-label={`${s.title}: ${s.text ?? s.items?.join('; ')}`}
+              aria-label={t(`${s.title}: ${s.text ?? s.items?.join('; ')}`, `${s.title}：${s.text ?? s.items?.join('；')}`)}
               aria-expanded={open === s.key}
               onClick={() => setOpen(open === s.key ? null : s.key)}
               onMouseEnter={() => setOpen(s.key)}
@@ -246,7 +248,7 @@ export function Scene({ label, spots, caption, step, steps, action, onAction, on
         </p>
         {step > 0 && (
           <button type="button" className="link-button" onClick={onReset}>
-            Start over
+            {t('Start over', '重新开始')}
           </button>
         )}
       </div>
@@ -263,12 +265,27 @@ const TRACK = [
   { caption: 'Tap 3 · Departed PACU. The unit is ready; the card is wiped for the next patient.', time: '15:44', event: 'Departed PACU', board: 2 },
 ]
 
+const TRACK_ZH: typeof TRACK = [
+  { caption: '手术室在术前将一张可重复使用的 NFC 卡与患者绑定。', time: '', event: '', board: 0 },
+  { caption: '第 1 次触碰 · 已到达 PACU。患者随即出现在床位看板上。', time: '14:02', event: '已到达 PACU', board: 0 },
+  { caption: '第 2 次触碰 · 可以转出。床位管理员立即分配床位。', time: '15:31', event: '可以转出', board: 1 },
+  { caption: '第 3 次触碰 · 已离开 PACU。病区已准备就绪；卡片清除后供下一位患者使用。', time: '15:44', event: '已离开 PACU', board: 2 },
+]
+
 const TRACK_SPOTS: Spot[] = [
   { key: 'or', x: 105, y: 214, title: 'OR team', text: 'Links the card to the patient’s encounter before surgery.' },
   { key: 'nurse', x: 474, y: 190, title: 'PACU nurse', text: 'Taps on arrival, when the patient is ready to move, and on departure — no calls, no typing.' },
   { key: 'hold', x: 576, y: 134, title: 'Where holds build up', text: 'Patients wait here, ready to leave, until a bed and a nurse are free.' },
   { key: 'epic', x: 872, y: 50, title: 'Epic', text: 'Logs every tap with the time and the place. Nobody enters a status by hand.' },
   { key: 'board', x: 872, y: 250, title: 'Command Center · bed manager', text: 'Sees “Ready” the moment it is tapped and assigns a bed. The receiving unit sees the patient coming.' },
+]
+
+const TRACK_SPOTS_ZH: Spot[] = [
+  { key: 'or', x: 105, y: 214, title: '手术室团队', text: '术前将卡片与患者的就诊记录绑定。' },
+  { key: 'nurse', x: 474, y: 190, title: 'PACU 护士', text: '在患者到达、可以转出和离开时各触碰一次，无需打电话，也无需录入。' },
+  { key: 'hold', x: 576, y: 134, title: '滞留在此累积', text: '已可离开的患者在此等待，直到床位和护士都空出来。' },
+  { key: 'epic', x: 872, y: 50, title: 'Epic', text: '记录每次触碰的时间与地点，无需任何人手动录入状态。' },
+  { key: 'board', x: 872, y: 250, title: '指挥中心 · 床位管理员', text: '触碰的那一刻即可看到“就绪”，并分配床位；接收病区也能看到患者即将转入。' },
 ]
 
 /** Seen from behind at a desk: whoever watches the board. */
@@ -283,9 +300,12 @@ export function Watcher({ x, y }: { x: number; y: number }) {
 }
 
 export function TrackingScene() {
+  const t = useT()
+  const track = useL(TRACK, TRACK_ZH)
+  const trackSpots = useL(TRACK_SPOTS, TRACK_SPOTS_ZH)
   const [step, setStep] = useState(0)
-  const done = step === TRACK.length - 1
-  const s = TRACK[step]
+  const done = step === track.length - 1
+  const s = track[step]
   // where the patient is: on the gurney at the OR, in the PACU bed, then gone to the unit
   const inPacu = step === 1 || step === 2
   const boardCol = [627, 715, 803][s.board]
@@ -294,12 +314,15 @@ export function TrackingScene() {
   const wire = `M${reader.x + 24} ${reader.y - 10}C600 ${reader.y - 10} 592 112 615 112`
   return (
     <Scene
-      label="Illustration of NFC patient tracking: the PACU nurse taps the patient’s card at the bedside reader, Epic logs it and the bed board updates."
-      spots={TRACK_SPOTS}
+      label={t(
+        'Illustration of NFC patient tracking: the PACU nurse taps the patient’s card at the bedside reader, Epic logs it and the bed board updates.',
+        'NFC 患者追踪示意图：PACU 护士在床旁读卡器上触碰患者的卡片，Epic 记录该事件，床位看板随之更新。',
+      )}
+      spots={trackSpots}
       caption={s.caption}
       step={step}
-      steps={TRACK.length - 1}
-      action={done ? 'Replay' : step === 0 ? 'Tap the card' : 'Tap again'}
+      steps={track.length - 1}
+      action={done ? t('Replay', '重播') : step === 0 ? t('Tap the card', '触碰卡片') : t('Tap again', '再次触碰')}
       onAction={() => setStep(done ? 0 : step + 1)}
       onReset={() => setStep(0)}
     >
@@ -312,7 +335,7 @@ export function TrackingScene() {
       <path className="sc-line" d="M108 196v184" />
       <rect className="sc-line" fill="#f7f6f2" x="70" y="222" width="16" height="34" rx="2" />
       <rect className="sc-line" fill="#f7f6f2" x="130" y="222" width="16" height="34" rx="2" />
-      <Sign x={108} y={124} text="OR" w={78} />
+      <Sign x={108} y={124} text={t('OR', '手术室')} w={78} />
       <g className="sc-move" style={{ opacity: step === 0 ? 1 : 0.18 }}>
         <Person x={210} y={380} scrub="#86b2dc" skin="#e0b48f" cap="#3d63a8" reach={[176, 302]} />
         <rect className="sc-line thin" fill="#fff" x="199" y="219" width="22" height="12" rx="4" />
@@ -326,7 +349,7 @@ export function TrackingScene() {
       {/* PACU bay, outlined in gold: where holds build up */}
       <rect className={`sc-hold${inPacu ? ' is-on' : ''}`} x="238" y="118" width="352" height="272" rx="14" />
       <text className="sc-hold-label" x="256" y="144">
-        WHERE HOLDS BUILD UP
+        {t('WHERE HOLDS BUILD UP', '滞留在此累积')}
       </text>
       <Sign x={414} y={88} text="PACU" />
       {/* vitals monitor and IV pole */}
@@ -354,18 +377,18 @@ export function TrackingScene() {
           <circle cx="430" cy="232" r="20" fill="#fff" className="sc-line" />
           <path className="sc-line" fill="none" d="M439 227a10 10 0 1 0 2 8M440 220v8h-8" />
           <text className="sc-small muted" x="430" y="268" textAnchor="middle">
-            card wiped
+            {t('card wiped', '卡片已清除')}
           </text>
         </g>
       )}
 
       {/* Epic */}
       <Monitor x={615} y={22} w={272} h={180} title="Epic · PACU">
-        {TRACK.slice(1, step + 1).map((r, i) => (
-          <g key={r.event} className={i === step - 1 ? 'sc-row is-new' : 'sc-row'}>
+        {track.slice(1, step + 1).map((r, i) => (
+          <g key={r.time} className={i === step - 1 ? 'sc-row is-new' : 'sc-row'}>
             <rect x="629" y={70 + i * 38} width="244" height="30" rx="5" />
             <text className="sc-small strong" x="639" y={90 + i * 38}>
-              Patient A
+              {t('Patient A', '患者 A')}
             </text>
             <text className="sc-small" x="711" y={90 + i * 38}>
               {r.event}
@@ -377,22 +400,22 @@ export function TrackingScene() {
         ))}
         {step === 0 && (
           <text className="sc-small muted" x="751" y="126" textAnchor="middle">
-            Not in the PACU yet
+            {t('Not in the PACU yet', '尚未进入 PACU')}
           </text>
         )}
       </Monitor>
 
       {/* bed board, watched by the bed manager */}
-      <Monitor x={615} y={222} w={272} h={150} title="Bed board">
-        {['In PACU', 'Ready', 'To unit'].map((c, i) => (
-          <g key={c}>
+      <Monitor x={615} y={222} w={272} h={150} title={t('Bed board', '床位看板')}>
+        {[t('In PACU', '在 PACU'), t('Ready', '就绪'), t('To unit', '转往病区')].map((c, i) => (
+          <g key={i}>
             <rect fill={i === 2 && done ? '#dcefe1' : '#f0f3f7'} x={625 + i * 88} y="270" width="84" height="88" rx="5" />
             <text className="sc-small muted" x={667 + i * 88} y="288" textAnchor="middle">
               {c}
             </text>
           </g>
         ))}
-        {step > 0 && <BoardCard x={boardCol} y={308} label="Pt A" tone={s.board === 1 ? 'gold' : s.board === 2 ? 'green' : 'blue'} />}
+        {step > 0 && <BoardCard x={boardCol} y={308} label={t('Pt A', '患者 A')} tone={s.board === 1 ? 'gold' : s.board === 2 ? 'green' : 'blue'} />}
       </Monitor>
       <Watcher x={918} y={384} />
 
@@ -415,7 +438,16 @@ const CLEAN_SPOTS: Spot[] = [
   { key: 'board', x: 912, y: 236, title: 'Command Center · bed manager', text: 'Sees “Ready to assign” at once and gives the room to a patient held in the PACU.' },
 ]
 
+const CLEAN_SPOTS_ZH: Spot[] = [
+  { key: 'evs', x: 300, y: 130, title: '环境服务部（EVS）员工', text: '开始清洁时触碰一次，房间清洁完毕时再触碰一次。' },
+  { key: 'guard', x: 426, y: 90, title: '7 分钟防误触', text: '7 分钟内的第二次触碰会被忽略，因此误触两下也不会把未清洁的房间标记为已清洁。' },
+  { key: 'epic', x: 752, y: 48, title: 'Epic', text: '将触碰转换为房间状态，无需致电指挥中心。' },
+  { key: 'board', x: 912, y: 236, title: '指挥中心 · 床位管理员', text: '立即看到“可分配”，并将房间分配给滞留在 PACU 的患者。' },
+]
+
 export function CleaningScene() {
+  const t = useT()
+  const cleanSpots = useL(CLEAN_SPOTS, CLEAN_SPOTS_ZH)
   const [state, setState] = useState<Clean>('dirty')
   const [minutes, setMinutes] = useState(0)
   const [taps, setTaps] = useState(0)
@@ -452,22 +484,39 @@ export function CleaningScene() {
   const step = state === 'dirty' ? 0 : state === 'cleaning' ? 1 : 2
   const caption =
     state === 'dirty'
-      ? 'A patient was discharged. The room needs cleaning before anyone can move in.'
+      ? t('A patient was discharged. The room needs cleaning before anyone can move in.', '一位患者已出院。房间需要清洁后才能接收新患者。')
       : state === 'cleaning'
         ? ignored !== null
-          ? `Second tap after ${ignored} min ignored: under the 7-minute safeguard.`
-          : `Tap 1 · Cleaning in progress, shown live in Epic. ${minutes} min so far.`
-        : 'Tap 2 · Ready to assign. The bed manager gives the room to a held PACU patient.'
+          ? t(
+              `Second tap after ${ignored} min ignored: under the 7-minute safeguard.`,
+              `${ignored} 分钟后的第二次触碰已被忽略：未满 7 分钟防误触时限。`,
+            )
+          : t(
+              `Tap 1 · Cleaning in progress, shown live in Epic. ${minutes} min so far.`,
+              `第 1 次触碰 · 正在清洁，Epic 中实时显示。已进行 ${minutes} 分钟。`,
+            )
+        : t(
+            'Tap 2 · Ready to assign. The bed manager gives the room to a held PACU patient.',
+            '第 2 次触碰 · 可分配。床位管理员将房间分配给一位滞留在 PACU 的患者。',
+          )
   const reader = { x: 340, y: 210 }
-  const status = { dirty: 'Needs cleaning', cleaning: 'Cleaning in progress', ready: 'Ready to assign' }[state]
+  const status = t(
+    { dirty: 'Needs cleaning', cleaning: 'Cleaning in progress', ready: 'Ready to assign' },
+    { dirty: '待清洁', cleaning: '正在清洁', ready: '可分配' },
+  )[state]
   return (
     <Scene
-      label="Illustration of the NFC bed-cleaning status: EVS staff tap a card at the room’s reader when they start and finish, Epic updates the room’s status and the bed board shows it ready."
-      spots={CLEAN_SPOTS}
+      label={t(
+        'Illustration of the NFC bed-cleaning status: EVS staff tap a card at the room’s reader when they start and finish, Epic updates the room’s status and the bed board shows it ready.',
+        'NFC 床位清洁状态示意图：环境服务部（EVS）员工在开始和完成清洁时，于房间读卡器上触碰卡片，Epic 更新房间状态，床位看板显示其已就绪。',
+      )}
+      spots={cleanSpots}
       caption={caption}
       step={step}
       steps={2}
-      action={state === 'ready' ? 'Replay' : state === 'dirty' ? 'Tap the EVS card' : 'Tap again (finished)'}
+      action={
+        state === 'ready' ? t('Replay', '重播') : state === 'dirty' ? t('Tap the EVS card', '触碰 EVS 卡片') : t('Tap again (finished)', '再次触碰（已完成）')
+      }
       onAction={tap}
       onReset={reset}
     >
@@ -476,7 +525,7 @@ export function CleaningScene() {
 
       {/* the patient room */}
       <rect fill="#e9eef3" x="24" y="64" width="400" height="316" />
-      <Sign x={130} y={42} text="Room 7W-12" w={150} />
+      <Sign x={130} y={42} text={t('Room 7W-12', '7W-12 病房')} w={150} />
       <rect className="sc-line" fill="#dfe6ee" x="370" y="120" width="44" height="260" rx="3" />
       <rect className="sc-line" fill="#cfe0f1" x="60" y="110" width="110" height="80" rx="4" />
       <path className="sc-line" d="M115 110v80M60 150h110" />
@@ -529,7 +578,7 @@ export function CleaningScene() {
       </g>
 
       {/* Epic */}
-      <Monitor x={470} y={22} w={300} h={170} title="Epic · Room 7W-12">
+      <Monitor x={470} y={22} w={300} h={170} title={t('Epic · Room 7W-12', 'Epic · 7W-12 病房')}>
         <rect
           className="sc-status"
           fill={state === 'ready' ? '#dcefe1' : state === 'cleaning' ? '#fff3bf' : '#f6dcd7'}
@@ -544,15 +593,15 @@ export function CleaningScene() {
         </text>
         {state === 'cleaning' && (
           <text className="sc-small muted" x="620" y="160" textAnchor="middle">
-            started 10:12 · {minutes} min
+            {t(`started 10:12 · ${minutes} min`, `10:12 开始 · ${minutes} 分钟`)}
           </text>
         )}
       </Monitor>
 
       {/* bed board and the held patient */}
-      <Monitor x={640} y={210} w={290} h={170} title="Bed board · Command Center">
-        {['Cleaning', 'Ready'].map((c, i) => (
-          <g key={c}>
+      <Monitor x={640} y={210} w={290} h={170} title={t('Bed board · Command Center', '床位看板 · 指挥中心')}>
+        {[t('Cleaning', '清洁中'), t('Ready', '就绪')].map((c, i) => (
+          <g key={i}>
             <rect fill={i === 1 && state === 'ready' ? '#dcefe1' : '#f0f3f7'} x={650 + i * 136} y="262" width="130" height="106" rx="5" />
             <text className="sc-small muted" x={715 + i * 136} y="280" textAnchor="middle">
               {c}
@@ -566,7 +615,7 @@ export function CleaningScene() {
           <g className="sc-fade">
             <rect fill="#fff3bf" className="sc-line thin" x="790" y="336" width="124" height="26" rx="6" />
             <text className="sc-small" x="852" y="354" textAnchor="middle">
-              PACU hold → 7W-12
+              {t('PACU hold → 7W-12', 'PACU 滞留 → 7W-12')}
             </text>
           </g>
         )}
@@ -589,10 +638,19 @@ const OVERLAP_SPOTS: Spot[] = [
   { key: 'rota', x: 912, y: 46, title: 'Paired schedules', text: 'Managers keep most nurses on 7–7 and move about a quarter to 6–6 so the hand-offs never line up.' },
 ]
 
+const OVERLAP_SPOTS_ZH: Spot[] = [
+  { key: 'pacu', x: 120, y: 150, title: 'PACU 护士', text: '患者恰好在晚 7 点可以离开 PACU，而这正是滞留最集中的时段。' },
+  { key: 'report', x: 606, y: 150, title: '7–7 班护士（约 75%）', text: '约在晚 6:45 至 7:15 进行交班报告，因此这一班次的护士都无法接收新患者。' },
+  { key: 'free', x: 430, y: 168, title: '6–6 班护士（约 25%）', text: '下午 6 点上班，6:15 前已完成交班报告，因此可以接收患者。' },
+  { key: 'rota', x: 912, y: 46, title: '错峰排班', text: '护士长让大多数护士保持 7–7 班次，并将约四分之一调整为 6–6 班次，使交接时间不再重叠。' },
+]
+
 // schedule screen: 4 PM … 9 PM across the screen
 const tx = (h: number) => 740 + ((h - 16) / 5) * 176
 
 export function OverlapScene() {
+  const t = useT()
+  const overlapSpots = useL(OVERLAP_SPOTS, OVERLAP_SPOTS_ZH)
   const [after, setAfter] = useState(false)
   const [wait, setWait] = useState(0)
   // before the change the held patient's wait keeps growing (a simulated minute every 0.3 s)
@@ -605,16 +663,25 @@ export function OverlapScene() {
 
   return (
     <Scene
-      label="Illustration of overlapping shifts: at 7 PM the 7-to-7 nurses are in report, while a nurse on a 6-to-6 shift is free to receive the PACU patient."
-      spots={OVERLAP_SPOTS}
+      label={t(
+        'Illustration of overlapping shifts: at 7 PM the 7-to-7 nurses are in report, while a nurse on a 6-to-6 shift is free to receive the PACU patient.',
+        '错峰班次示意图：晚 7 点，7–7 班护士正在交班报告，而一位 6–6 班护士空闲，可以接收 PACU 患者。',
+      )}
+      spots={overlapSpots}
       caption={
         after
-          ? 'With 6–6 shifts: a nurse who finished report at 6:15 receives the patient at once.'
-          : `Today, 7 PM: every inpatient nurse is in report. The PACU patient has waited ${wait} min.`
+          ? t(
+              'With 6–6 shifts: a nurse who finished report at 6:15 receives the patient at once.',
+              '采用 6–6 班次后：一位已在 6:15 完成交班报告的护士立即接收患者。',
+            )
+          : t(
+              `Today, 7 PM: every inpatient nurse is in report. The PACU patient has waited ${wait} min.`,
+              `目前，晚 7 点：住院病区所有护士都在交班报告。PACU 患者已等待 ${wait} 分钟。`,
+            )
       }
       step={after ? 2 : 0}
       steps={2}
-      action={after ? 'Back to all 7–7 shifts' : 'Add 6–6 shifts'}
+      action={after ? t('Back to all 7–7 shifts', '恢复为全部 7–7 班次') : t('Add 6–6 shifts', '增加 6–6 班次')}
       onAction={() => setAfter(!after)}
       onReset={() => setAfter(false)}
     >
@@ -634,7 +701,7 @@ export function OverlapScene() {
       <path className="sc-line" fill="#d9b48c" d="M450 196l-34 14v170h34z" />
       <path className="sc-line" fill="none" d="M480 330h80M492 330v40M548 330v40" />
       <rect className="sc-line thin" fill="#dfe6ee" x="520" y="226" width="40" height="28" rx="3" />
-      <Sign x={515} y={124} text="Inpatient" w={130} />
+      <Sign x={515} y={124} text={t('Inpatient', '住院病区')} w={130} />
 
       {/* the 7–7 nurses, in report at the station */}
       <Person x={624} y={380} scrub="#3d63a8" skin="#e0b48f" hair="#5a3a22" />
@@ -642,7 +709,7 @@ export function OverlapScene() {
       <g>
         <rect className="sc-line thin" fill="#fff" x="592" y="172" width="70" height="26" rx="13" />
         <text className="sc-small" x="627" y="190" textAnchor="middle">
-          report…
+          {t('report…', '交班中…')}
         </text>
       </g>
 
@@ -677,10 +744,10 @@ export function OverlapScene() {
       </g>
 
       {/* schedule screen */}
-      <Monitor x={722} y={22} w={212} h={196} title="Shifts · 7 PM">
+      <Monitor x={722} y={22} w={212} h={196} title={t('Shifts · 7 PM', '班次 · 晚 7 点')}>
         {[17, 18, 19, 20].map((h) => (
           <text key={h} className="sc-small muted" x={tx(h)} y="78" textAnchor="middle">
-            {h - 12} PM
+            {t(`${h - 12} PM`, `${h}时`)}
           </text>
         ))}
         <rect fill="rgba(255,207,1,0.28)" x={tx(18.75)} y="86" width={tx(19.25) - tx(18.75)} height="104" />

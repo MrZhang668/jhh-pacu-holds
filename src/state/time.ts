@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { tr } from './lang'
 
 /**
  * Time of day for the scene (0–24 h), shared by the UI (slider) and the 3D scene (sun, window
@@ -8,7 +9,7 @@ import { useSyncExternalStore } from 'react'
 const params = new URLSearchParams(window.location.search)
 const linked = params.get('time')
 let hours = linked !== null && Number(linked) >= 0 && Number(linked) < 24 ? Number(linked) : 14
-// the clock runs by itself, a day a minute, unless a link or a still capture pins the hour. Phones and
+// the clock runs by itself, a day every five minutes, unless a link or a still capture pins the hour. Phones and
 // reduced motion start paused, like the ambient life, because every step redraws the scene.
 const pinned = linked !== null || params.has('capture')
 const calm = window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 767px), (pointer: coarse)').matches
@@ -16,7 +17,7 @@ let playing = !pinned && !calm
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((l) => l())
 
-export const DAY_SECONDS = 60 // one full day of playback
+export const DAY_SECONDS = 300 // one full day of playback
 
 export const timeStore = {
   get: () => hours,
@@ -44,6 +45,8 @@ export function formatHour(h: number): string {
   const total = Math.round(h * 60) % (24 * 60)
   const hh = Math.floor(total / 60)
   const mm = total % 60
+  // Chinese readers expect the 24-hour clock
+  if (tr(false, true)) return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
   const suffix = hh < 12 ? 'AM' : 'PM'
   return `${hh % 12 === 0 ? 12 : hh % 12}:${String(mm).padStart(2, '0')} ${suffix}`
 }

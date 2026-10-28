@@ -1,6 +1,7 @@
-import { MODULES } from '../content/modules'
+import { MODULES, MODULES_ZH } from '../content/modules'
 import type { ModuleKey } from '../data/campus'
 import type { LabelSpec } from '../scene/labels'
+import { useL, useT } from '../state/lang'
 
 interface Props {
   specs: LabelSpec[]
@@ -13,6 +14,7 @@ interface Props {
 
 /** DOM labels over the canvas; <LabelProjector> (inside the canvas) positions them every frame. */
 export function LabelLayer({ specs, els, visited, active, onHover, onOpen }: Props) {
+  const t = useT()
   return (
     <div className="label-layer">
       {specs.map((s) => (
@@ -41,7 +43,7 @@ export function LabelLayer({ specs, els, visited, active, onHover, onOpen }: Pro
             </div>
           ) : s.kind === 'event' ? (
             <div className="event-tag" aria-hidden="true">
-              {s.title}
+              {t(s.title, s.titleZh ?? s.title)}
             </div>
           ) : (
             <div className="sname" aria-hidden="true">
@@ -65,7 +67,8 @@ interface ModuleLabelProps {
 
 /** Numbered pill on a stem, pointing at the roof of the module's building. */
 export function ModuleLabel({ building, moduleKey, visited, active, onHover, onOpen }: ModuleLabelProps) {
-  const m = MODULES[moduleKey]
+  const m = useL(MODULES, MODULES_ZH)[moduleKey]
+  const t = useT()
   const hover = (on: boolean) => onHover(on ? building ?? null : null)
   return (
     <button
@@ -85,7 +88,7 @@ export function ModuleLabel({ building, moduleKey, visited, active, onHover, onO
       <span className="pill">
         <span className="n">{m.n}</span>
         {m.label}
-        {visited && <span className="seen" title="Visited" />}
+        {visited && <span className="seen" title={t('Visited', '已浏览')} />}
       </span>
       <span className="stem" aria-hidden="true" />
       <span className="dot" aria-hidden="true" />

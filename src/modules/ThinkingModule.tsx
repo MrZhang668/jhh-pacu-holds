@@ -1,39 +1,51 @@
 import type React from 'react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { DMAIC_DETAIL, ISSUE_TREE, MATRIX, MATRIX_TAKEAWAY, type TreeNode } from '../content/thinking'
+import {
+  DMAIC_DETAIL,
+  DMAIC_DETAIL_ZH,
+  ISSUE_TREE,
+  ISSUE_TREE_ZH,
+  MATRIX,
+  MATRIX_TAKEAWAY,
+  MATRIX_TAKEAWAY_ZH,
+  MATRIX_ZH,
+  type TreeNode,
+} from '../content/thinking'
+import { useL, useT } from '../state/lang'
 import { WorkflowScene } from './WorkflowScene'
 
 type Tab = 'flow' | 'tree' | 'matrix'
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'flow', label: 'Workflow map' },
-  { key: 'tree', label: 'Issue tree' },
-  { key: 'matrix', label: 'Impact matrix' },
+const TABS: { key: Tab; label: string; zh: string }[] = [
+  { key: 'flow', label: 'Workflow map', zh: '工作流程图' },
+  { key: 'tree', label: 'Issue tree', zh: '问题树' },
+  { key: 'matrix', label: 'Impact matrix', zh: '影响矩阵' },
 ]
 
 export default function ThinkingModule() {
+  const t = useT()
   const [tab, setTab] = useState<Tab>('flow')
   const [highlight, setHighlight] = useState<string | null>(null)
   const tabs = useRef<HTMLDivElement>(null)
   return (
     <>
       <DmaicFlow
-        onOpen={(t) => {
-          setTab(t)
+        onOpen={(next) => {
+          setTab(next)
           tabs.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })
         }}
       />
-      <div ref={tabs} className="tabs" role="tablist" aria-label="Thinking tools">
-        {TABS.map((t) => (
+      <div ref={tabs} className="tabs" role="tablist" aria-label={t('Thinking tools', '分析工具')}>
+        {TABS.map((x) => (
           <button
-            key={t.key}
+            key={x.key}
             type="button"
             role="tab"
-            id={`tab-${t.key}`}
-            aria-selected={tab === t.key}
-            aria-controls={`panel-${t.key}`}
-            onClick={() => setTab(t.key)}
+            id={`tab-${x.key}`}
+            aria-selected={tab === x.key}
+            aria-controls={`panel-${x.key}`}
+            onClick={() => setTab(x.key)}
           >
-            {t.label}
+            {t(x.label, x.zh)}
           </button>
         ))}
       </div>
@@ -55,11 +67,14 @@ export default function ThinkingModule() {
 
 /** Appendix A redrawn: one patient's path, step by step, with what loads each step behind icons. */
 function FlowMap() {
+  const t = useT()
   return (
     <section>
       <p>
-        We followed one surgical patient from the OR to home. Holds appear at the hand-offs, where one unit waits on
-        another. Glowing icons matter at the current step; tap any icon to see what loads it.
+        {t(
+          'We followed one surgical patient from the OR to home. Holds appear at the hand-offs, where one unit waits on another. Glowing icons matter at the current step; tap any icon to see what loads it.',
+          '我们跟随一位手术患者，从手术室（OR）一直走到出院回家。滞留出现在交接环节，即一个科室在等待另一个科室的时候。发光的图标表示与当前步骤相关；点击任一图标，可查看影响该环节的因素。',
+        )}
       </p>
       <WorkflowScene />
     </section>
@@ -85,17 +100,37 @@ const MAP_ROW = 42
 // average glyph width per level, for guessing how a label wraps
 const MAP_CHAR = [8, 7.8, 7, 6.6]
 
-/** Lines a label wraps to in `width` px, greedy by word. */
+const CJK = /[\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef]/
+const CJK_WORDS = /[\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef]|[^\s\u2e80-\u9fff\uf900-\ufaff\uff00-\uffef]+/g
+
+/**
+ * Lines a label wraps to in `width` px, greedy by word. A Chinese character can break anywhere and is
+ * about two Latin glyphs wide; English labels take the original word-by-word path unchanged.
+ */
 function lineCount(text: string, width: number, char: number) {
   const per = Math.max(8, Math.floor(width / char))
   let lines = 1
   let used = 0
-  for (const word of text.split(' ')) {
-    const len = word.length + (used ? 1 : 0)
+  if (!CJK.test(text)) {
+    for (const word of text.split(' ')) {
+      const len = word.length + (used ? 1 : 0)
+      if (used && used + len > per) {
+        lines++
+        used = word.length
+      } else used += len
+    }
+    return lines
+  }
+  let prevCjk = true
+  for (const word of text.match(CJK_WORDS) ?? []) {
+    const cjk = CJK.test(word)
+    const size = cjk ? 2 : word.length
+    const len = size + (used && !cjk && !prevCjk ? 1 : 0)
     if (used && used + len > per) {
       lines++
-      used = word.length
+      used = size
     } else used += len
+    prevCjk = cjk
   }
   return lines
 }
@@ -124,6 +159,8 @@ interface Placed {
 
 /** Appendix B as a mind map: foldable, searchable, and able to jump to a node from the matrix. */
 function IssueTree({ highlight }: { highlight: string | null }) {
+  const t = useT()
+  const tree = useL(ISSUE_TREE, ISSUE_TREE_ZH)
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<Set<string>>(() => new Set(ALL_BRANCHES))
   const q = query.trim().toLowerCase()
@@ -189,7 +226,7 @@ function IssueTree({ highlight }: { highlight: string | null }) {
     }
     return p
   }
-  place(ISSUE_TREE, 0, -1)
+  place(tree, 0, -1)
   const height = cursor + MAP_PAD
   const x0 = (d: number) => MAP_COLS[d][0] * width
   const x1 = (d: number) => MAP_COLS[d][1] * width
@@ -198,16 +235,24 @@ function IssueTree({ highlight }: { highlight: string | null }) {
   return (
     <section>
       <p>
-        Every contributor to a hold, split by where it happens. Keeping the branches mutually exclusive forced us to dig into
-        each unit instead of repeating “communication” everywhere.
+        {t(
+          'Every contributor to a hold, split by where it happens. Keeping the branches mutually exclusive forced us to dig into each unit instead of repeating “communication” everywhere.',
+          '按发生地点拆分的所有滞留影响因素。保持各分支相互独立，迫使我们深入分析每个科室，而不是处处重复“沟通”二字。',
+        )}
       </p>
       <div className="tree-tools">
-        <input type="search" placeholder="Search the tree…" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search the issue tree" />
+        <input
+          type="search"
+          placeholder={t('Search the tree…', '搜索问题树…')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label={t('Search the issue tree', '搜索问题树')}
+        />
         <button type="button" className="link-button" onClick={() => setOpen(new Set(ALL_BRANCHES))}>
-          Expand all
+          {t('Expand all', '全部展开')}
         </button>
         <button type="button" className="link-button" onClick={() => setOpen(new Set(['root']))}>
-          Collapse all
+          {t('Collapse all', '全部收起')}
         </button>
       </div>
       <div className="mindmap-scroll" ref={wrap}>
@@ -270,6 +315,7 @@ function IssueTree({ highlight }: { highlight: string | null }) {
 
 // where an issue happens, from its node in the issue tree; colours match the tree's branches
 const LOCATIONS = ['Operating room', 'PACU', 'Inpatient unit', 'Hospital-wide']
+const LOCATIONS_ZH: typeof LOCATIONS = ['手术室', 'PACU', '住院病区', '全院层面']
 const locOf = (node: string) => (node.startsWith('or-') ? 0 : node.startsWith('pacu-') ? 1 : node.startsWith('in-') ? 2 : 3)
 
 // quadrants in reading order, matching the chart: top-left, top-right, bottom-left, bottom-right
@@ -279,10 +325,20 @@ const QUADS = [
   { name: 'Fill-ins', note: 'Low impact · low effort' },
   { name: 'Hard, low payoff', note: 'Low impact · high effort' },
 ]
+const QUADS_ZH: typeof QUADS = [
+  { name: '速赢项', note: '高影响 · 低投入' },
+  { name: '重点项目', note: '高影响 · 高投入' },
+  { name: '补充项', note: '低影响 · 低投入' },
+  { name: '难度大、回报低', note: '低影响 · 高投入' },
+]
 const quadOf = ([x, y]: [number, number]) => (y >= 0.5 ? 0 : 2) + (x >= 0.5 ? 1 : 0)
 
 /** Appendix C: impact × effort, sorted into quadrants and coloured by location. */
 function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
+  const t = useT()
+  const matrix = useL(MATRIX, MATRIX_ZH)
+  const locations = useL(LOCATIONS, LOCATIONS_ZH)
+  const quads = useL(QUADS, QUADS_ZH)
   const [hover, setHover] = useState<string | null>(null)
   const [loc, setLoc] = useState<number | null>(null)
   const [quad, setQuad] = useState<number | null>(null)
@@ -297,8 +353,8 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
   const px = (x: number) => X0 + x * (X1 - X0)
   const py = (y: number) => Y1 - y * (Y1 - Y0)
   // numbered in reading order: quadrant by quadrant, so each list counts up
-  const ranked = [...MATRIX].sort((a, b) => quadOf(a.pos) - quadOf(b.pos))
-  const items = MATRIX.map((m) => ({ ...m, n: ranked.indexOf(m) + 1, loc: locOf(m.node) }))
+  const ranked = [...matrix].sort((a, b) => quadOf(a.pos) - quadOf(b.pos))
+  const items = matrix.map((m) => ({ ...m, n: ranked.indexOf(m) + 1, loc: locOf(m.node) }))
   const lit = (m: (typeof items)[number]) => (loc === null || m.loc === loc) && (quad === null || quadOf(m.pos) === quad)
   const quadRect = [
     [X0, Y0],
@@ -308,9 +364,9 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
   ]
   return (
     <section>
-      <p>{MATRIX_TAKEAWAY}</p>
-      <div className="mx-legend" role="group" aria-label="Filter by where the issue happens">
-        {LOCATIONS.map((l, i) => (
+      <p>{t(MATRIX_TAKEAWAY, MATRIX_TAKEAWAY_ZH)}</p>
+      <div className="mx-legend" role="group" aria-label={t('Filter by where the issue happens', '按问题发生地点筛选')}>
+        {locations.map((l, i) => (
           <button key={l} type="button" className={`mx-chip c${i}`} aria-pressed={loc === i} onClick={() => setLoc(loc === i ? null : i)}>
             <span className="mx-swatch" aria-hidden="true" />
             {l}
@@ -320,8 +376,8 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
       </div>
       <div className="matrix mx">
         <div className="mx-plot">
-          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Impact versus effort">
-            {QUADS.map((q, i) => {
+          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t('Impact versus effort', '影响与投入对比')}>
+            {quads.map((q, i) => {
               const [x, y] = quadRect[i]
               const n = items.filter((m) => quadOf(m.pos) === i).length
               return (
@@ -339,10 +395,10 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
             <line x1={X0} x2={X1} y1={Y1} y2={Y1} className="axis" />
             <line x1={X0} x2={X0} y1={Y0} y2={Y1} className="axis" />
             <text x={XM} y={H - 8} className="axis-label" textAnchor="middle">
-              Effort →
+              {t('Effort →', '投入 →')}
             </text>
             <text x={18} y={YM} className="axis-label" textAnchor="middle" transform={`rotate(-90 18 ${YM})`}>
-              Impact →
+              {t('Impact →', '影响 →')}
             </text>
             {items.map((m) => {
               const [x, y] = m.pos
@@ -353,7 +409,10 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
                   style={{ transform: `translate(${px(x)}px, ${py(y)}px)` }}
                   tabIndex={0}
                   role="button"
-                  aria-label={`${m.n}. ${m.label}, ${LOCATIONS[m.loc]} — show in the issue tree`}
+                  aria-label={t(
+                    `${m.n}. ${m.label}, ${locations[m.loc]} — show in the issue tree`,
+                    `${m.n}. ${m.label}，${locations[m.loc]}：在问题树中查看`,
+                  )}
                   onMouseEnter={() => setHover(m.key)}
                   onMouseLeave={() => setHover(null)}
                   onFocus={() => setHover(m.key)}
@@ -390,7 +449,7 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
         </div>
         {/* the same four quadrants as lists, laid out like the chart */}
         <div className="mx-quads">
-          {QUADS.map((q, i) => {
+          {quads.map((q, i) => {
             const list = items.filter((m) => quadOf(m.pos) === i)
             return (
               <div
@@ -419,7 +478,7 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className="mx-empty">None</p>
+                  <p className="mx-empty">{t('None', '无')}</p>
                 )}
               </div>
             )
@@ -427,33 +486,39 @@ function ImpactMatrix({ onPick }: { onPick: (node: string) => void }) {
         </div>
       </div>
       <p className="sources">
-        Positions read off the team’s hand-drawn matrix. Colours show where each issue happens; click a point or an item to find it
-        in the issue tree.
+        {t(
+          'Positions read off the team’s hand-drawn matrix. Colours show where each issue happens; click a point or an item to find it in the issue tree.',
+          '各点位置取自团队手绘的矩阵。颜色表示问题发生的地点；点击某个点或条目，即可在问题树中找到它。',
+        )}
       </p>
     </section>
   )
 }
 
 // where each step's work lives on the site: a tab below, or the outcomes module
-const DMAIC_LINKS: ({ tab: Tab; label: string } | { href: string; label: string })[] = [
-  { tab: 'flow', label: 'Open the workflow map' },
-  { tab: 'tree', label: 'Open the issue tree' },
-  { tab: 'matrix', label: 'Open the impact matrix' },
-  { href: '#/outcomes', label: 'See the three interventions' },
-  { href: '#/outcomes', label: 'See the roll-out plan' },
+const DMAIC_LINKS: ({ tab: Tab; label: string; zh: string } | { href: string; label: string; zh: string })[] = [
+  { tab: 'flow', label: 'Open the workflow map', zh: '打开工作流程图' },
+  { tab: 'tree', label: 'Open the issue tree', zh: '打开问题树' },
+  { tab: 'matrix', label: 'Open the impact matrix', zh: '打开影响矩阵' },
+  { href: '#/outcomes', label: 'See the three interventions', zh: '查看三项改进措施' },
+  { href: '#/outcomes', label: 'See the roll-out plan', zh: '查看推行计划' },
 ]
 
 /** The five DMAIC steps as one interlocking arrow; a step's detail opens beneath it on hover or tap. */
 function DmaicFlow({ onOpen }: { onOpen: (t: Tab) => void }) {
+  const t = useT()
+  const steps = useL(DMAIC_DETAIL, DMAIC_DETAIL_ZH)
   const [on, setOn] = useState<number | null>(null)
-  const d = on === null ? null : DMAIC_DETAIL[on]
+  const d = on === null ? null : steps[on]
+  // the English step name: the big letter, keys, and the gloss after the Chinese title
+  const en = on === null ? null : DMAIC_DETAIL[on].step
   const link = on === null ? null : DMAIC_LINKS[on]
   return (
-    <section className="dmaic-flow" aria-label="How we worked: DMAIC" onMouseLeave={() => setOn(null)}>
-      <p className="dm-eyebrow">How we worked · DMAIC</p>
+    <section className="dmaic-flow" aria-label={t('How we worked: DMAIC', '工作方法：DMAIC')} onMouseLeave={() => setOn(null)}>
+      <p className="dm-eyebrow">{t('How we worked · DMAIC', '工作方法 · DMAIC')}</p>
       <ol className="dm-chain">
-        {DMAIC_DETAIL.map((s, i) => (
-          <li key={s.step} className={`dm-step s${i}${on === i ? ' is-on' : ''}${on !== null && on !== i ? ' is-off' : ''}`}>
+        {steps.map((s, i) => (
+          <li key={DMAIC_DETAIL[i].step} className={`dm-step s${i}${on === i ? ' is-on' : ''}${on !== null && on !== i ? ' is-off' : ''}`}>
             <button
               type="button"
               aria-expanded={on === i}
@@ -463,7 +528,7 @@ function DmaicFlow({ onOpen }: { onOpen: (t: Tab) => void }) {
               onClick={() => setOn(on === i ? null : i)}
             >
               <span className="dm-letter" aria-hidden="true">
-                {s.step[0]}
+                {DMAIC_DETAIL[i].step[0]}
               </span>
               <span className="dm-name">{s.step}</span>
             </button>
@@ -473,24 +538,24 @@ function DmaicFlow({ onOpen }: { onOpen: (t: Tab) => void }) {
       <div id="dm-detail" className={`dm-detail${d ? ' is-open' : ''}`} style={{ '--at': `${(on ?? 0) * 20 + 10}%` } as React.CSSProperties}>
         <div className="dm-clip">
           {d && link && (
-            <div className="dm-card" key={d.step}>
-              <b className="dm-title">{d.step}</b>
+            <div className="dm-card" key={en}>
+              <b className="dm-title">{t(d.step, `${d.step}（${en}）`)}</b>
               <span className="dm-tools">{d.tools}</span>
               <p>{d.text}</p>
               {'tab' in link ? (
                 <button type="button" className="link-button" onClick={() => onOpen(link.tab)}>
-                  {link.label} ↓
+                  {t(link.label, link.zh)} ↓
                 </button>
               ) : (
                 <a className="link-button" href={link.href}>
-                  {link.label} →
+                  {t(link.label, link.zh)} →
                 </a>
               )}
             </div>
           )}
         </div>
       </div>
-      {!d && <p className="dm-hint">Hover or tap a step to see what we did.</p>}
+      {!d && <p className="dm-hint">{t('Hover or tap a step to see what we did.', '将鼠标悬停在某一步骤上或点击它，查看我们做了什么。')}</p>}
     </section>
   )
 }

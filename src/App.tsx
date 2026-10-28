@@ -4,9 +4,11 @@ import { loadCampus, type Campus, type ModuleKey } from './data/campus'
 import { closePanel, navigate, useRoute } from './router'
 import { buildLabelSpecs } from './scene/labels'
 import { loadFlag, loadVisited, saveFlag, saveVisited, useIsNight, useMediaQuery } from './state/hooks'
+import { tr, useT } from './state/lang'
 import { FallbackMap } from './ui/FallbackMap'
 import { Header } from './ui/Header'
 import { HoverTip } from './ui/HoverTip'
+import { LangToggle } from './ui/LangToggle'
 import { LabelLayer } from './ui/LabelLayer'
 import { MapControls } from './ui/MapControls'
 import { OverviewPanel } from './ui/OverviewPanel'
@@ -52,6 +54,7 @@ const prefers = (query: string) => window.matchMedia(query).matches
 
 export default function App() {
   const route = useRoute()
+  const t = useT()
   const [campus, setCampus] = useState<Campus | null>(null)
   const [webgl, setWebgl] = useState(hasWebGL)
   const [plan, setPlan] = useState(false)
@@ -83,7 +86,7 @@ export default function App() {
     if (webgl) loadScene().then(() => bootProgress(0.3), () => undefined) // a failure surfaces in SceneBoundary
     loadCampus((f) => bootProgress(0.15 + 0.6 * f)).then(
       (c) => {
-        bootProgress(0.8, 'Building the scene…')
+        bootProgress(0.8, tr('Building the scene…', '正在构建场景…'))
         setCampus(c)
       },
       (e: unknown) => bootFail(e instanceof Error ? e.message : String(e)),
@@ -194,7 +197,7 @@ export default function App() {
         {webgl && <TimeControls panelOpen={panelOpen} />}
       </div>
       {!panelOpen && <OverviewPanel collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />}
-      {webgl && (
+      {webgl ? (
         <MapControls
           compass={compass}
           onNorth={() => setNorthTick((n) => n + 1)}
@@ -211,13 +214,25 @@ export default function App() {
           ambient={ambient}
           onAmbient={toggleAmbient}
         />
+      ) : (
+        <div className="map-controls">
+          <LangToggle />
+        </div>
       )}
       {webgl && !interacted && !panelOpen && (
-        <p className="hint glass">Drag to rotate · Scroll to zoom · Right-drag to pan · Pick a numbered label to explore</p>
+        <p className="hint glass">
+          {t(
+            'Drag to rotate · Scroll to zoom · Right-drag to pan · Pick a numbered label to explore',
+            '拖动旋转 · 滚轮缩放 · 右键拖动平移 · 点击带编号的标签开始探索',
+          )}
+        </p>
       )}
       <footer className="smallprint">
-        Independent student project (JHU MSEM Team 6) · Not an official Johns Hopkins Medicine website · Map data ©
-        OpenStreetMap contributors ·{' '}
+        {t(
+          'Independent student project (JHU MSEM) · Not an official Johns Hopkins Medicine website · Map data © OpenStreetMap contributors',
+          '独立学生项目（JHU MSEM）· 非约翰斯·霍普金斯医学官方网站 · 地图数据 © OpenStreetMap 贡献者',
+        )}{' '}
+        ·{' '}
         <a
           href="#/about"
           onClick={(e) => {
@@ -225,13 +240,13 @@ export default function App() {
             navigate('about')
           }}
         >
-          About the team &amp; references
+          {t('About the team & references', '关于团队与参考文献')}
         </a>
       </footer>
       {campus && <SidePanel route={route} onClose={closePanel} />}
       {CAPTURE === 'og' && (
         <div className="og-card">
-          <p className="og-eyebrow">JHU MSEM · Team 6 · Fall 2025</p>
+          <p className="og-eyebrow">JHU MSEM · Fall 2025</p>
           <h1>Reducing OR &amp; PACU Holds</h1>
           <p>Patient flow at The Johns Hopkins Hospital, explored on a 3D model of the East Baltimore campus.</p>
         </div>

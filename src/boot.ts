@@ -1,3 +1,5 @@
+import { tr } from './state/lang'
+
 // The loading screen lives in index.html so it shows before any script runs. These helpers move its
 // progress bar and fade it out once the first frame of the campus is on screen.
 
@@ -32,5 +34,5 @@ export function bootFail(message: string) {
   el.classList.add('is-error')
   el.setAttribute('aria-busy', 'false')
   const text = el.querySelector('.boot-note')
-  if (text) text.textContent = `${message}. Please reload the page.`
+  if (text) text.textContent = tr(`${message}. Please reload the page.`, `${message}。请刷新页面。`)
 }

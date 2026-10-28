@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FALLBACK } from '../content/fallback'
 import { MODULES } from '../content/modules'
 import type { ModuleKey } from '../data/campus'
+import { useT } from '../state/lang'
 import { ModuleLabel } from './LabelLayer'
 
 // room (screen pixels) the pills need around their anchor points
@@ -25,6 +26,7 @@ interface Props {
 export function FallbackMap({ overviewOpen, visited, active, onOpen, onLoad }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const [view, setView] = useState({ scale: 0, x: 0, y: 0, fade: '' })
+  const t = useT()
 
   useEffect(() => {
     const el = box.current
@@ -76,7 +78,10 @@ export function FallbackMap({ overviewOpen, visited, active, onOpen, onLoad }: P
     <div className="fallback" ref={box}>
       <img
         src={`${import.meta.env.BASE_URL}${FALLBACK.image}`}
-        alt="Illustrated 3D model of The Johns Hopkins Hospital campus in East Baltimore, seen from the south-west."
+        alt={t(
+          'Illustrated 3D model of The Johns Hopkins Hospital campus in East Baltimore, seen from the south-west.',
+          '约翰斯·霍普金斯医院东巴尔的摩园区的 3D 插画模型（西南方向视角）。',
+        )}
         width={FALLBACK.width}
         height={FALLBACK.height}
         className={view.fade}
@@ -102,8 +107,10 @@ export function FallbackMap({ overviewOpen, visited, active, onOpen, onLoad }: P
           </div>
         ))}
       <p className="fallback-note glass">
-        This browser can’t show the interactive 3D model, so this is a still image of it. The labels and everything
-        else work the same.
+        {t(
+          'This browser can’t show the interactive 3D model, so this is a still image of it. The labels and everything else work the same.',
+          '当前浏览器无法显示交互式 3D 模型，因此这里展示的是静态图像。标签及其他功能均可正常使用。',
+        )}
       </p>
     </div>
   )

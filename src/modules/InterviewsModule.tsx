@@ -1,24 +1,28 @@
 import { useState } from 'react'
-import { GUIDE, PEOPLE, STAKEHOLDERS } from '../content/interviews'
+import { GUIDE, GUIDE_ZH, PEOPLE, PEOPLE_ZH, STAKEHOLDERS, STAKEHOLDERS_ZH } from '../content/interviews'
+import { useL, useT } from '../state/lang'
 
 export default function InterviewsModule() {
+  const t = useT()
   return (
     <>
       <section>
-        <h3>Who we heard from</h3>
+        <h3>{t('Who we heard from', '我们访谈了谁')}</h3>
         <MeetingScene />
         <StakeholderMap />
       </section>
       <Guide />
-      <p className="sources">Interviewees appear by role and unit only.</p>
+      <p className="sources">{t('Interviewees appear by role and unit only.', '受访者仅以职务和所在病区呈现。')}</p>
     </>
   )
 }
 
 /** The meeting illustration; each person opens what we concluded from that group. */
 function MeetingScene() {
+  const t = useT()
+  const people = useL(PEOPLE, PEOPLE_ZH)
   const [active, setActive] = useState<(typeof PEOPLE)[number]['key'] | null>(null)
-  const person = PEOPLE.find((p) => p.key === active)
+  const person = people.find((p) => p.key === active)
   return (
     <>
       <div className="meeting">
@@ -26,10 +30,13 @@ function MeetingScene() {
           src={`${import.meta.env.BASE_URL}images/who-we-heard.webp`}
           width={1672}
           height={941}
-          alt="Illustration: staff from the OR, PACU, inpatient units, nursing supervision and bed management around one table."
+          alt={t(
+            'Illustration: staff from the OR, PACU, inpatient units, nursing supervision and bed management around one table.',
+            '插图：来自手术室、PACU、住院病区、护理督导和床位管理的工作人员围坐在一张桌旁。',
+          )}
           loading="lazy"
         />
-        {PEOPLE.map((p) => {
+        {people.map((p) => {
           const [left, top, width, height] = p.box
           return (
             <button
@@ -37,7 +44,7 @@ function MeetingScene() {
               type="button"
               className="meeting-person"
               style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
-              aria-label={`${p.title}: what we learned`}
+              aria-label={t(`${p.title}: what we learned`, `${p.title}：我们的发现`)}
               aria-expanded={active === p.key}
               aria-controls="meeting-findings"
               onClick={() => setActive(active === p.key ? null : p.key)}
@@ -47,7 +54,7 @@ function MeetingScene() {
       </div>
       {person ? (
         <div id="meeting-findings" className="sh-detail" key={person.key} aria-live="polite">
-          <button type="button" className="sh-close" aria-label="Close" onClick={() => setActive(null)}>
+          <button type="button" className="sh-close" aria-label={t('Close', '关闭')} onClick={() => setActive(null)}>
             ×
           </button>
           <h4>{person.title}</h4>
@@ -60,7 +67,7 @@ function MeetingScene() {
         </div>
       ) : (
         <p id="meeting-findings" className="sh-hint">
-          Click anyone at the table to see what we learned from them.
+          {t('Click anyone at the table to see what we learned from them.', '点击桌旁任意一人，查看我们从其所在群体获得的发现。')}
         </p>
       )}
     </>
@@ -71,10 +78,12 @@ type StepKey = (typeof STAKEHOLDERS)[number]['key']
 
 /** The hand-off chain as two lanes; a step's notes open only when it is picked. */
 function StakeholderMap() {
+  const t = useT()
+  const stakeholders = useL(STAKEHOLDERS, STAKEHOLDERS_ZH)
   const [active, setActive] = useState<StepKey | null>(null)
-  const node = STAKEHOLDERS.find((s) => s.key === active)
-  const flow = STAKEHOLDERS.filter((s) => s.lane === 'flow')
-  const support = STAKEHOLDERS.filter((s) => s.lane === 'support')
+  const node = stakeholders.find((s) => s.key === active)
+  const flow = stakeholders.filter((s) => s.lane === 'flow')
+  const support = stakeholders.filter((s) => s.lane === 'support')
 
   const card = (s: (typeof STAKEHOLDERS)[number], i?: number) => (
     <button
@@ -93,7 +102,7 @@ function StakeholderMap() {
   return (
     <>
       <div className="sh-map">
-        <p className="sh-lane-label">Patient path</p>
+        <p className="sh-lane-label">{t('Patient path', '患者路径')}</p>
         <div className="sh-flow">
           {flow.map((s, i) => (
             <div key={s.key} className="sh-cell">
@@ -112,13 +121,13 @@ function StakeholderMap() {
           ))}
         </div>
         <div className="sh-support">
-          <p className="sh-lane-label">Supporting every step</p>
+          <p className="sh-lane-label">{t('Supporting every step', '贯穿各环节的支持')}</p>
           <div className="sh-support-row">{support.map((s) => card(s))}</div>
         </div>
       </div>
       {node ? (
         <div id="sh-detail" className="sh-detail" key={node.key} aria-live="polite">
-          <button type="button" className="sh-close" aria-label="Close" onClick={() => setActive(null)}>
+          <button type="button" className="sh-close" aria-label={t('Close', '关闭')} onClick={() => setActive(null)}>
             ×
           </button>
           <h4>{node.name}</h4>
@@ -126,7 +135,7 @@ function StakeholderMap() {
         </div>
       ) : (
         <p id="sh-detail" className="sh-hint">
-          Select a step to see where it gets stuck.
+          {t('Select a step to see where it gets stuck.', '选择一个环节，查看它在哪里受阻。')}
         </p>
       )}
     </>
@@ -134,11 +143,18 @@ function StakeholderMap() {
 }
 
 function Guide() {
+  const t = useT()
+  const guide = useL(GUIDE, GUIDE_ZH)
   return (
     <section>
-      <h3>How we asked</h3>
-      <p>Semi-structured interviews: the same four topics every time, with follow-ups on real recent cases.</p>
-      {GUIDE.map((g) => (
+      <h3>{t('How we asked', '我们如何提问')}</h3>
+      <p>
+        {t(
+          'Semi-structured interviews: the same four topics every time, with follow-ups on real recent cases.',
+          '半结构化访谈：每次围绕相同的四个主题，并结合近期真实案例进行追问。',
+        )}
+      </p>
+      {guide.map((g) => (
         <details key={g.topic} className="guide">
           <summary>{g.topic}</summary>
           <ul>
